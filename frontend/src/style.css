@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* === 字体系统 === */
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* === 品牌色彩 === */
+  --color-primary:   #3B82F6;   /* 蓝 - 主要操作 / CTA */
+  --color-primary-light: #93C5FD;
+  --color-primary-dark:  #1D4ED8;
+
+  --color-secondary: #0EA5E9;   /* 天蓝 - 次要强调 */
+  --color-cta:      #10B981;   /* 翠绿 - 正向状态 / 成功 */
+
+  /* === 文字层级 === */
+  --color-text:       #0F172A;   /* 主文字 */
+  --color-text-secondary: #475569; /* 次要文字 */
+  --color-text-muted:    #94A3B8; /* 占位 / 辅助 */
+
+  /* === 背景层级 === */
+  --color-background: #F0F9FF;  /* 页面背景（极浅蓝白） */
+  --color-surface:     #FFFFFF;   /* 卡片 / 面板 */
+  --color-surface-2:  #F8FAFC;   /* 次级表面 */
+  --color-surface-3:  #F1F5F9;   /* 输入框背景 */
+
+  /* === 边框 === */
+  --color-border:     #E2E8F0;
+  --color-border-strong: #CBD5E1;
+
+  /* === 语义色彩 === */
+  --color-success:    #10B981;
+  --color-success-bg: #ECFDF5;
+  --color-warning:    #F59E0B;
+  --color-warning-bg: #FFFBEB;
+  --color-danger:     #EF4444;
+  --color-danger-bg:  #FEF2F2;
+  --color-info:       #0EA5E9;
+  --color-info-bg:   #E0F2FE;
+
+  /* === 阴影 === */
+  --shadow-card:  0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-panel: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
+  --shadow-float: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
+
+  /* === 圆角 === */
+  --radius-sm:  6px;
+  --radius-md:  10px;
+  --radius-lg:  14px;
+  --radius-xl:  20px;
+  --radius-full: 9999px;
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply font-sans bg-background text-text;
+  }
+
+  /* === 统一滚动条样式 === */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 9999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+  }
+
+  /* === 全局选中色 === */
+  ::selection {
+    background: #BFDBFE;
+    color: #1E40AF;
+  }
+}
+
+/* === 全局组件字体覆盖 === */
+.tiny-grid,
+.tiny-tabs,
+.tiny-button,
+.tiny-grid-header,
+.tiny-grid-body {
+  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+.font-mono {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace !important;
+}
+
+/* === 页面过渡动画 === */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(4px);
+}

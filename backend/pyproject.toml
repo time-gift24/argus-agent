@@ -1,7 +1,23 @@
 [project]
-name = "backend"
+name = "argus-agents"
 version = "0.1.0"
-description = "Add your description here"
+description = "Agent Management Platform"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+
+dependencies = [
+    "fastapi==0.135.1",
+    "uvicorn[standard]==0.41.0",
+    "sqlalchemy==2.0.48",
+    "pydantic==2.12.5",
+    "pydantic-settings==2.13.1",
+    "alembic==1.18.1",
+    "python-multipart>=0.0.22",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.25.0",
+    "httpx>=0.28.1",
+]

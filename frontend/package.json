@@ -14,6 +14,7 @@
   },
   "devDependencies": {
     "@opentiny/vue": "^3.29.0",
+    "@tailwindcss/vite": "^4.2.2",
     "@vitejs/plugin-vue": "^5.0.0",
     "autoprefixer": "^10.4.27",
     "lucide-vue-next": "^1.0.0",

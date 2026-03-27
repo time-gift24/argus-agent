@@ -17,7 +17,7 @@
           <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
             <component :is="icons.Cpu" class="w-5 h-5" />
           </div>
-          <span class="text-xl font-bold tracking-tight">Argus Agents</span>
+          <span class="text-xl font-bold tracking-tight text-text">Argus 智能体</span>
         </div>
         <button @click="isSidebarOpen = false" class="lg:hidden p-1 text-gray-400">
           <component :is="icons.X" class="w-5 h-5" />
@@ -34,13 +34,13 @@
           @click="isSidebarOpen = false"
         >
           <component :is="item.icon" class="w-5 h-5" />
-          <span class="font-medium text-sm">{{ item.name }}</span>
+          <span class="font-bold text-sm">{{ item.name }}</span>
         </router-link>
       </nav>
       
       <div class="p-4 border-t border-gray-200">
-        <div class="flex items-center gap-3 px-4 py-2 text-gray-500 text-sm italic">
-          v0.1.0-alpha
+        <div class="flex items-center gap-3 px-4 py-2 text-gray-500 text-xs italic">
+          版本 v0.1.0-alpha
         </div>
       </div>
     </aside>
@@ -49,7 +49,7 @@
     <div class="flex-1 flex flex-col overflow-hidden min-w-0">
       <!-- Header with Mobile Toggle -->
       <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-8 shrink-0">
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-4 flex-1">
           <button @click="isSidebarOpen = true" class="lg:hidden p-2 -ml-2 text-gray-400 hover:text-primary transition-colors">
             <component :is="icons.Menu" class="w-6 h-6" />
           </button>
@@ -81,8 +81,7 @@
 <script setup>
 import { ref } from 'vue'
 import { 
-  Layout as LayoutIcon, Cpu, Settings, FileText, 
-  Terminal, Menu, X 
+  Cpu, Wrench, Menu, X 
 } from 'lucide-vue-next'
 import GlobalHeader from '../components/GlobalHeader.vue'
 
@@ -90,11 +89,8 @@ const icons = { Cpu, Menu, X }
 const isSidebarOpen = ref(false)
 
 const menuItems = [
-  { name: 'Dashboard', path: '/', icon: LayoutIcon },
-  { name: 'Agents', path: '/agents', icon: Cpu },
-  { name: 'Shell', path: '/shell', icon: Terminal },
-  { name: 'Logs', path: '/logs', icon: FileText },
-  { name: 'Settings', path: '/settings', icon: Settings },
+  { name: '智能体管理', path: '/agents', icon: Cpu },
+  { name: '工具箱', path: '/tools', icon: Wrench },
 ]
 </script>
 

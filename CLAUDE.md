@@ -1,4 +1,12 @@
-# 基础开发指南
+# 项目法则（严格遵守）
+
+- 禁止在 main 分支路径中有任何代码操作
+- 改动不分大小，均需新建 git worktree 
+
+## 谨记技能！！！
+- using-git-worktrees
+
+# 开发指南
 
 ## 设计与检视原则(非常重要)
 - YAGNI（You Ain't Gonna Need It，你不会需要它）

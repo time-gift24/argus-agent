@@ -13,6 +13,9 @@ description: 在开始任何需要写代码的实施工作时使用。在项目 
 - **文档阶段**（OpenSpec propose/explore/archive）：可以在 main 分支操作文件和文档，但**不提交代码**
 - **实施阶段**（实现 feature/bugfix/重构）：必须位于 `.worktrees/` 下的 worktree
 
+## 第零步：保持远程同步
+git rebase origin/main 或者 git rebase origin/master
+
 ## 第一步：检测当前分支
 
 ```bash

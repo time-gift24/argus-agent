@@ -10,6 +10,8 @@ Implement tasks from an OpenSpec change.
 **Input**: Optionally specify a change name (e.g., `/opsx:apply add-auth`). If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
 
 **Steps**
+0. **Confirm workspace**
+   use skill `using-git-worktrees` confirm workspace
 
 1. **Select the change**
 

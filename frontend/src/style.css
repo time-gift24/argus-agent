@@ -1,54 +1,98 @@
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Manrope:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   /* === 字体系统 === */
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-headline: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-label: "Manrope", ui-sans-serif, system-ui, sans-serif;
 
-  /* === 品牌色彩 === */
-  --color-primary:   #3B82F6;   /* 蓝 - 主要操作 / CTA */
-  --color-primary-light: #93C5FD;
-  --color-primary-dark:  #1D4ED8;
+  /* === Material Design 3 Color Tokens (Axiom Azure) === */
+  --color-background: #f8f9fa;
+  --color-primary: #003ec7;
+  --color-primary-fixed: #dde1ff;
+  --color-primary-fixed-dim: #b7c4ff;
+  --color-primary-container: #0052ff;
+  --color-on-primary: #ffffff;
+  --color-on-primary-fixed: #001452;
+  --color-on-primary-fixed-variant: #0038b6;
+  --color-on-primary-container: #dfe3ff;
 
-  --color-secondary: #0EA5E9;   /* 天蓝 - 次要强调 */
-  --color-cta:      #10B981;   /* 翠绿 - 正向状态 / 成功 */
+  --color-secondary: #525f71;
+  --color-secondary-fixed: #d6e4f9;
+  --color-secondary-fixed-dim: #bac8dc;
+  --color-secondary-container: #d3e1f6;
+  --color-on-secondary: #ffffff;
+  --color-on-secondary-fixed: #0f1c2c;
+  --color-on-secondary-fixed-variant: #3a4859;
+  --color-on-secondary-container: #566475;
 
-  /* === 文字层级 === */
-  --color-text:       #0F172A;   /* 主文字 */
-  --color-text-secondary: #475569; /* 次要文字 */
-  --color-text-muted:    #94A3B8; /* 占位 / 辅助 */
+  --color-tertiary: #005761;
+  --color-tertiary-fixed: #9cf0ff;
+  --color-tertiary-fixed-dim: #00daf3;
+  --color-tertiary-container: #00717e;
+  --color-on-tertiary: #ffffff;
+  --color-on-tertiary-fixed: #001f24;
+  --color-on-tertiary-fixed-variant: #004f58;
+  --color-on-tertiary-container: #a7f1ff;
 
-  /* === 背景层级 === */
-  --color-background: #F0F9FF;  /* 页面背景（极浅蓝白） */
-  --color-surface:     #FFFFFF;   /* 卡片 / 面板 */
-  --color-surface-2:  #F8FAFC;   /* 次级表面 */
-  --color-surface-3:  #F1F5F9;   /* 输入框背景 */
+  --color-error: #ba1a1a;
+  --color-error-container: #ffdad6;
+  --color-on-error: #ffffff;
+  --color-on-error-container: #93000a;
+
+  --color-surface: #f8f9fa;
+  --color-surface-dim: #d9dadb;
+  --color-surface-bright: #f8f9fa;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f3f4f5;
+  --color-surface-container: #edeeef;
+  --color-surface-container-high: #e7e8e9;
+  --color-surface-container-highest: #e1e3e4;
+  --color-surface-variant: #e1e3e4;
+  --color-surface-tint: #004ced;
+
+  --color-on-surface: #191c1d;
+  --color-on-surface-variant: #434656;
+  --color-inverse-surface: #2e3132;
+  --color-inverse-on-surface: #f0f1f2;
+  --color-inverse-primary: #b7c4ff;
+  --color-on-background: #191c1d;
+
+  --color-outline: #737688;
+  --color-outline-variant: #c3c5d9;
+
+  /* === 语义色彩（保持兼容） === */
+  --color-success: #10B981;
+  --color-success-bg: #ECFDF5;
+  --color-warning: #F59E0B;
+  --color-warning-bg: #FFFBEB;
+  --color-danger: #EF4444;
+  --color-danger-bg: #FEF2F2;
+  --color-info: #0EA5E9;
+  --color-info-bg: #E0F2FE;
+
+  /* === 文字层级（保持兼容） === */
+  --color-text: #191c1d;
+  --color-text-secondary: #475569;
+  --color-text-muted: #94A3B8;
 
   /* === 边框 === */
-  --color-border:     #E2E8F0;
+  --color-border: #E2E8F0;
   --color-border-strong: #CBD5E1;
 
-  /* === 语义色彩 === */
-  --color-success:    #10B981;
-  --color-success-bg: #ECFDF5;
-  --color-warning:    #F59E0B;
-  --color-warning-bg: #FFFBEB;
-  --color-danger:     #EF4444;
-  --color-danger-bg:  #FEF2F2;
-  --color-info:       #0EA5E9;
-  --color-info-bg:   #E0F2FE;
-
   /* === 阴影 === */
-  --shadow-card:  0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.06), 0 1px 2px -1px rgb(0 0 0 / 0.06);
   --shadow-panel: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.07);
   --shadow-float: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.08);
 
   /* === 圆角 === */
-  --radius-sm:  6px;
-  --radius-md:  10px;
-  --radius-lg:  14px;
-  --radius-xl:  20px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
   --radius-full: 9999px;
 }
 
@@ -66,10 +110,9 @@
   }
 
   body {
-    @apply font-sans bg-background text-text;
+    @apply font-body bg-surface text-on-surface;
   }
 
-  /* === 统一滚动条样式 === */
   ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -85,27 +128,50 @@
     background: #94A3B8;
   }
 
-  /* === 全局选中色 === */
   ::selection {
-    background: #BFDBFE;
-    color: #1E40AF;
+    background: #dde1ff;
+    color: #001452;
   }
 }
 
-/* === 全局组件字体覆盖 === */
+/* === Glass Panel === */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+/* === Architectural Grid Background === */
+.architectural-grid {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(195, 197, 217, 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(195, 197, 217, 0.1) 1px, transparent 1px);
+}
+
+/* === Glow Pulse === */
+.glow-pulse {
+  box-shadow: 0 0 12px rgba(0, 218, 243, 0.4);
+}
+
+/* === Global Component Font Override === */
 .tiny-grid,
 .tiny-tabs,
 .tiny-button,
 .tiny-grid-header,
 .tiny-grid-body {
-  font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif !important;
+  font-family: "Manrope", ui-sans-serif, system-ui, sans-serif !important;
 }
 
 .font-mono {
   font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace !important;
 }
 
-/* === 页面过渡动画 === */
+.font-headline {
+  font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif !important;
+}
+
+/* === Page Transitions === */
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 200ms ease, transform 200ms ease;
@@ -115,3 +181,34 @@
   opacity: 0;
   transform: translateY(4px);
 }
+
+/* === Sidebar Transitions === */
+.sidebar-transition {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.main-transition {
+  transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* === Stagger Animation === */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s ease-out both;
+}
+
+.animate-delay-1 { animation-delay: 0.1s; }
+.animate-delay-2 { animation-delay: 0.2s; }
+.animate-delay-3 { animation-delay: 0.3s; }
+.animate-delay-4 { animation-delay: 0.4s; }
+.animate-delay-5 { animation-delay: 0.5s; }

@@ -1,27 +1,55 @@
 <!-- @mock — 3 行占位配置，无真实设置数据；替换为：GET /api/settings -->
 <template>
-  <div class="space-y-5">
-    <div>
-      <h1 class="text-2xl font-bold tracking-tight text-text">系统设置</h1>
-      <p class="text-sm text-text-muted mt-0.5">配置平台全局参数与权限策略</p>
+  <div class="max-w-7xl mx-auto space-y-5">
+    <div class="animate-fade-up">
+      <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">
+        System <span class="text-primary">Settings</span>
+      </h1>
+      <p class="text-sm text-on-surface-variant mt-1">Configure platform parameters and access policies.</p>
     </div>
 
     <!-- Settings Groups -->
-    <div class="space-y-4">
-      <div class="bg-surface rounded-xl border border-border shadow-card p-5">
-        <h2 class="text-sm font-bold text-text mb-4 pb-3 border-b border-border">通用设置</h2>
-        <div class="space-y-4">
-          <div v-for="i in 3" :key="i" class="flex items-center justify-between py-2">
+    <div class="space-y-6">
+      <div class="bg-surface-container-lowest rounded-[2rem] border border-outline-variant/30 shadow-sm p-6 animate-fade-up animate-delay-1">
+        <h2 class="text-sm font-headline font-bold text-on-surface mb-5 pb-4 border-b border-outline-variant/20">General Configuration</h2>
+        <div class="space-y-0">
+          <div v-for="(setting, i) in generalSettings" :key="i" class="flex items-center justify-between py-4" :class="i < generalSettings.length - 1 ? 'border-b border-outline-variant/10' : ''">
             <div>
-              <p class="text-xs font-semibold text-text">配置参数 {{ i }}</p>
-              <p class="text-[11px] text-text-muted mt-0.5">该设置项控制智能体的核心运行行为。</p>
+              <p class="text-sm font-semibold text-on-surface">{{ setting.name }}</p>
+              <p class="text-xs text-on-surface-variant mt-1">{{ setting.desc }}</p>
             </div>
-            <button class="px-3 py-1.5 text-[11px] font-semibold text-primary border border-primary/30 bg-primary/10 rounded-lg hover:bg-primary hover:text-white transition-colors cursor-pointer">
-              编辑
-            </button>
+            <tiny-button size="small" plain>Edit</tiny-button>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-surface-container-lowest rounded-[2rem] border border-outline-variant/30 shadow-sm p-6 animate-fade-up animate-delay-2">
+        <h2 class="text-sm font-headline font-bold text-on-surface mb-5 pb-4 border-b border-outline-variant/20">Security & Access</h2>
+        <div class="space-y-0">
+          <div v-for="(setting, i) in securitySettings" :key="i" class="flex items-center justify-between py-4" :class="i < securitySettings.length - 1 ? 'border-b border-outline-variant/10' : ''">
+            <div>
+              <p class="text-sm font-semibold text-on-surface">{{ setting.name }}</p>
+              <p class="text-xs text-on-surface-variant mt-1">{{ setting.desc }}</p>
+            </div>
+            <tiny-button size="small" plain>Edit</tiny-button>
           </div>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<script setup>
+import { Button as TinyButton } from '@opentiny/vue'
+
+const generalSettings = [
+  { name: 'Max Concurrent Agents', desc: 'Maximum number of agents that can run simultaneously.' },
+  { name: 'Task Timeout', desc: 'Default timeout for agent task execution in seconds.' },
+  { name: 'Log Retention', desc: 'Number of days to retain system logs before archiving.' },
+]
+
+const securitySettings = [
+  { name: 'API Key Rotation', desc: 'Automatic API key rotation policy for agent authentication.' },
+  { name: 'Access Control', desc: 'Role-based access control configuration for the platform.' },
+]
+</script>

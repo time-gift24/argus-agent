@@ -50,3 +50,4 @@
 - 使用 `<script setup>` 语法糖
 - 组件样式使用 `scoped` 避免污染
 - 遵循项目 KISS/YAGNI/DRY 原则
+- 遵守 vue 的[规则](./rules/vue)

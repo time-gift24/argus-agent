@@ -37,6 +37,10 @@ test-cov-open: test-cov-report ## Run coverage and open report in browser
 
 # ─── Development Helpers ──────────────────────────────────────────────────────
 
+.PHONY: dev
+dev: ## Start dev server (loads .env.dev automatically)
+	uv run uvicorn main:app --reload --port 8000
+
 .PHONY: install-dev
 install-dev: ## Install dev dependencies (including test tooling)
 	uv sync --dev

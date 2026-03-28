@@ -1,37 +1,10 @@
 # 项目法则（严格遵守）
 
-## 工作空间确认
 - 禁止在 main 分支路径中有任何代码操作
 - 改动不分大小，均需新建 git worktree
 
-## 人机交互第一性原则（非常重要）
-- 动机与目标务必澄清，禁止假设我清楚我的目标
-- 动机与目标明晰后，客观给予我更优的最短路径实现
-- 出现任何设计缺陷和bug等，禁止以补丁思维说明，而是追溯到最源头的动机解释根因
-- 输出保持简洁，直击变更点或重点，禁止复述不变部分
-
 ## 谨记技能！！！
 - using-git-worktrees
-
-# Git 规范
-
-## 分支只保留一个 commit
-
-每个 feature 分支（worktree）**始终只有一个 commit**：
-- 开发过程中正常多次提交
-- 合入 main 前，`git reset --soft main` 然后重新提交为一条
-- commit message 必须完整记录分支上的所有变更摘要
-- 操作流程：
-  ```bash
-  git reset --soft main
-  git commit -m "feat: 完整变更摘要"
-  git push --force-with-lease origin <branch>
-  ```
-
-## 禁止 merge
-
-- 禁止 `git merge`，一律使用 `git rebase` 保持线性历史
-- 合并到 main 时使用 **Squash Merge**（GitHub PR 或本地 `git merge --squash`）
 
 # 项目结构
 

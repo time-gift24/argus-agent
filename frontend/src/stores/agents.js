@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 export const useAgentStore = defineStore('agents', () => {
+  // @mock — 4 条硬编码 agent 数据；替换为：GET /api/agents
   const agents = ref([
     { id: '1', name: 'Agent-001', status: 'Active', cpu: 12, memory: 128, lastSeen: '2026-03-27 10:00:00' },
     { id: '2', name: 'Agent-002', status: 'Active', cpu: 45, memory: 256, lastSeen: '2026-03-27 10:01:00' },

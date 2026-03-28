@@ -1,3 +1,4 @@
+<!-- @mock — 3 行占位配置，无真实设置数据；替换为：GET /api/settings -->
 <template>
   <div class="space-y-5">
     <div>

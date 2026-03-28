@@ -1,3 +1,4 @@
+<!-- @mock — agent 列表数据来自 stores/agents.js 的硬编码数组；替换为：GET /api/agents -->
 <template>
   <div class="space-y-5">
     <!-- Page Header -->

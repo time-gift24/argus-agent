@@ -49,6 +49,7 @@ import { ref, computed } from 'vue'
 
 const activeLevel = ref('全部')
 
+// @mock — 8 条硬编码日志；替换为：GET /api/logs
 const logs = [
   { time: '2026-03-27 14:32:01', level: '信息', levelClass: 'text-primary bg-primary/10', message: 'Agent-003 成功处理任务 #2048' },
   { time: '2026-03-27 14:28:45', level: '警告', levelClass: 'text-amber-500 bg-amber-50', message: 'Agent-007 CPU 使用率超过 85%' },

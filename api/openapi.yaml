@@ -1,0 +1,525 @@
+openapi: 3.0.3
+info:
+  title: argus-agents User Management API
+  version: 0.1.0
+  description: |
+    OAuth2/OIDC authentication + LLM provider management for argus-agents.
+
+    ## Authentication
+
+    All endpoints except `/auth/*` require a JWT Bearer token in the `Authorization` header:
+
+    ```
+    Authorization: Bearer <token>
+    ```
+
+    Obtain a token via `GET /auth/callback` (dev mode) or the full OIDC flow via `/auth/login`.
+
+    ## Dev Mode
+
+    Set `DEV_MODE=true` in environment. Dev mode bypasses OIDC and uses the `X-Dev-User` header:
+
+    ```http
+    GET /auth/callback?code=dev&state=dev
+    X-Dev-User: alice
+    ```
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local development
+
+security:
+  - Bearer: []
+
+tags:
+  - name: auth
+    description: Authentication (OIDC login and JWT callback)
+  - name: users
+    description: Current user profile
+  - name: providers
+    description: LLM provider management
+
+paths:
+  # ── Auth ────────────────────────────────────────────────────────────────────
+
+  /auth/login:
+    get:
+      operationId: auth_login
+      summary: Initiate OIDC login flow
+      description: |
+        In dev mode: redirects directly to `/auth/callback` with a dev bypass code.
+        In production: redirects to the OIDC provider's authorization endpoint.
+        Sets a signed `oidc_state` cookie to protect against CSRF on callback.
+      tags: [auth]
+      parameters:
+        - in: query
+          name: redirect_uri
+          schema:
+            type: string
+            default: "/"
+          description: Where to redirect after successful login (informational, not enforced)
+      responses:
+        "302":
+          description: Redirect to OIDC provider or callback URL
+      security: []
+
+  /auth/callback:
+    get:
+      operationId: auth_callback
+      summary: OIDC callback — exchange code, upsert user, return JWT
+      description: |
+        Validates the OIDC state (production), exchanges the authorization code for tokens,
+        fetches user info, upserts the user in the database, and returns a JWT.
+
+        In dev mode, set `X-Dev-User` header to bypass OIDC entirely.
+      tags: [auth]
+      parameters:
+        - in: query
+          name: code
+          required: true
+          schema:
+            type: string
+          description: Authorization code from OIDC provider (or `dev` in dev mode)
+        - in: query
+          name: state
+          required: true
+          schema:
+            type: string
+          description: OIDC state for CSRF validation
+        - in: header
+          name: X-Dev-User
+          schema:
+            type: string
+          description: Dev mode only — user identifier (e.g. `alice`)
+          required: false
+      responses:
+        "200":
+          description: JWT issued successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+              example:
+                token: "eyJhbGciOiJIUzI1NiJ9..."
+                token_type: Bearer
+        "400":
+          description: Missing or invalid state / X-Dev-User header in dev mode
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security: []
+
+  # ── Users ───────────────────────────────────────────────────────────────────
+
+  /users/me:
+    get:
+      operationId: get_me
+      summary: Get current user profile
+      tags: [users]
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserRead"
+              example:
+                id: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+                name: Alice
+                oauth_provider: dev
+                meta_data:
+                  email: alice@dev.local
+                created_at: "2026-03-27T10:00:00Z"
+                updated_at: "2026-03-27T10:00:00Z"
+        "401":
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    patch:
+      operationId: patch_me
+      summary: Update current user profile
+      description: Only the `name` field may be updated. Empty or whitespace-only names are rejected.
+      tags: [users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPatch"
+            example:
+              name: Alice Updated
+      responses:
+        "200":
+          description: Updated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserRead"
+        "400":
+          description: Name cannot be empty or whitespace-only
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ── Providers ────────────────────────────────────────────────────────────────
+
+  /internal-providers:
+    get:
+      operationId: list_internal_providers
+      summary: List all internal (system) providers
+      description: |
+        Returns all providers with `kind=internal`. The `config` field is never returned
+        (configs are encrypted at rest).
+      tags: [providers]
+      responses:
+        "200":
+          description: List of internal providers
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProviderRead"
+        "401":
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /providers:
+    get:
+      operationId: list_user_providers
+      summary: List current user's provider associations
+      description: |
+        Returns all user-provider associations for the authenticated user, ordered by
+        `created_at` descending (most recent first). Only includes `kind=user` providers.
+        Internal providers are not included.
+      tags: [providers]
+      responses:
+        "200":
+          description: User's provider associations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserProviderRead"
+        "401":
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      operationId: create_user_provider
+      summary: Create a new LLM provider for the current user
+      description: |
+        The `config` is JSON-serialized and encrypted with AES-256-GCM before storage.
+        The encrypted value is never returned in any response.
+
+        If this is the user's first provider, it is automatically set as the default.
+      tags: [providers]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProviderCreate"
+            example:
+              name: My OpenAI
+              config:
+                api_key: sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+                base_url: https://api.openai.com
+                model: gpt-4o-mini
+      responses:
+        "201":
+          description: Provider created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProviderRead"
+              example:
+                id: "b2c3d4e5-f6a7-8901-bcde-f23456789012"
+                name: My OpenAI
+                kind: user
+                created_at: "2026-03-27T10:05:00Z"
+                updated_at: "2026-03-27T10:05:00Z"
+        "401":
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /providers/{provider_id}:
+    delete:
+      operationId: delete_user_provider
+      summary: Delete a user-provider association
+      description: |
+        Removes the association between the current user and the specified provider.
+        The underlying `Provider` record is NOT deleted (it may be shared across users).
+
+        If the deleted provider was the user's default, the most recently created
+        remaining provider is automatically promoted to default.
+
+        Attempting to delete an internal provider returns `403 Forbidden`.
+        Attempting to delete another user's provider returns `404 Not Found`.
+      tags: [providers]
+      parameters:
+        - in: path
+          name: provider_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Provider UUID
+      responses:
+        "204":
+          description: Provider association deleted (no response body)
+        "401":
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Cannot delete internal provider
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Provider not found or not associated with user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /providers/{provider_id}/default:
+    put:
+      operationId: set_default_provider
+      summary: Set a provider as the user's default
+      description: |
+        Sets the specified provider as the user's default. All other `is_default` flags
+        for this user are cleared.
+      tags: [providers]
+      parameters:
+        - in: path
+          name: provider_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Provider UUID
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DefaultUpdate"
+      responses:
+        "200":
+          description: Provider set as default
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProviderRead"
+              example:
+                id: "b2c3d4e5-f6a7-8901-bcde-f23456789012"
+                name: My OpenAI
+                kind: user
+                is_default: true
+                created_at: "2026-03-27T10:05:00Z"
+        "401":
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Provider not associated with user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from `/auth/callback`
+
+  schemas:
+    TokenResponse:
+      type: object
+      required: [token, token_type]
+      properties:
+        token:
+          type: string
+          description: JWT Bearer token
+          example: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhMWIyYzNkNCJ9.abc123"
+        token_type:
+          type: string
+          default: Bearer
+          example: Bearer
+
+    UserRead:
+      type: object
+      required: [id, name, oauth_provider, meta_data, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: User UUID
+          example: "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
+        name:
+          type: string
+          example: Alice
+        oauth_provider:
+          type: string
+          description: OIDC provider identifier (e.g. `dev` or the OIDC issuer URL)
+          example: dev
+        meta_data:
+          type: object
+          additionalProperties: true
+          description: Arbitrary key-value metadata (e.g. email stored in meta_data)
+          example:
+            email: alice@dev.local
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-03-27T10:00:00Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-03-27T10:00:00Z"
+
+    UserPatch:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 256
+          description: New display name. Cannot be empty or whitespace-only.
+          example: Alice Updated
+
+    ProviderRead:
+      type: object
+      required: [id, name, kind, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "b2c3d4e5-f6a7-8901-bcde-f23456789012"
+        name:
+          type: string
+          example: argus-internal-default
+        kind:
+          type: string
+          enum: [user, internal]
+          example: internal
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    UserProviderRead:
+      type: object
+      required: [id, name, kind, is_default, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Provider UUID
+          example: "b2c3d4e5-f6a7-8901-bcde-f23456789012"
+        name:
+          type: string
+          example: My OpenAI
+        kind:
+          type: string
+          enum: [user, internal]
+          example: user
+        is_default:
+          type: boolean
+          description: Whether this is the user's default provider
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          description: When this association was created
+
+    ProviderCreate:
+      type: object
+      required: [name, config]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Display name for the provider
+          example: My OpenAI
+        config:
+          $ref: "#/components/schemas/ProviderConfigInput"
+
+    ProviderConfigInput:
+      type: object
+      required: [api_key]
+      properties:
+        api_key:
+          type: string
+          minLength: 1
+          description: API key for the LLM provider
+          example: sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        base_url:
+          type: string
+          nullable: true
+          description: Optional custom base URL
+          example: https://api.openai.com
+        model:
+          type: string
+          nullable: true
+          description: Optional default model name
+          example: gpt-4o-mini
+
+    DefaultUpdate:
+      type: object
+      description: Empty body for PUT /providers/{id}/default
+      default: {}
+
+    Error:
+      type: object
+      required: [detail]
+      properties:
+        detail:
+          type: string
+          description: Human-readable error message
+          example: Missing X-Dev-User header in dev mode

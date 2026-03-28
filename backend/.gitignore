@@ -11,3 +11,4 @@ wheels/
 
 # Git worktrees
 .worktrees/
+argus_agents.db

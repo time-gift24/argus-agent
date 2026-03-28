@@ -1,7 +1,7 @@
 # Makefile for argus-agents backend
 
 # ─── Variables ───────────────────────────────────────────────────────────────
-PYTHON := python
+PYTHON := uv run python
 PYTEST_ARGS := -v --tb=short
 COVERAGE_MIN := 80
 

@@ -1,6 +1,9 @@
 from fastapi import APIRouter
-from app.api.endpoints import llm_providers
+
+from app.api.endpoints import auth, providers, users
 
 api_router = APIRouter()
 
-api_router.include_router(llm_providers.router)
+api_router.include_router(auth.router)
+api_router.include_router(users.router)
+api_router.include_router(providers.router)

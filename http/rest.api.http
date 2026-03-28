@@ -1,0 +1,78 @@
+### ============================================================
+### argus-agents REST API — VS Code REST Client
+###
+### Prerequisites:
+###   1. Install VS Code extension: "REST Client" (humao.rest-client)
+###   2. Set DEV_MODE=true and run the server:
+###        cd backend && uvicorn main:app --reload --port 8000
+###   3. Obtain a JWT:
+###        • Option A (recommended): run `POST /auth/callback` request below,
+###          copy the `token` value from the response, paste it into
+###          the `YOUR_TOKEN_HERE` placeholder below, and remove this comment.
+###        • Option B: open http://localhost:8000/docs and use "Try it out".
+###
+### Usage: click "Send Request" above any `###`-delimited block.
+### ============================================================
+
+@baseUrl = http://localhost:8000/api/v1
+@token = YOUR_TOKEN_HERE   # ← paste JWT here after obtaining it
+
+# ── Auth ─────────────────────────────────────────────────────────────────────
+
+### POST /auth/callback — Dev login (get JWT)
+# Copy the "token" value from the response body into @token above
+POST {{baseUrl}}/auth/callback?code=dev&state=dev
+X-Dev-User: alice
+
+### GET /auth/login — Initiate OIDC flow (prod only; in dev mode redirects to callback)
+# In production, this redirects to the OIDC provider. Set DEV_MODE=false to test.
+GET {{baseUrl}}/auth/login?redirect_uri=/
+
+# ── Users ────────────────────────────────────────────────────────────────────
+
+### GET /users/me — Get current user
+GET {{baseUrl}}/users/me
+Authorization: Bearer {{token}}
+
+### PATCH /users/me — Update current user name
+PATCH {{baseUrl}}/users/me
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "name": "Alice Updated" }
+
+# ── Internal Providers ────────────────────────────────────────────────────────
+
+### GET /internal-providers — List system-level providers
+GET {{baseUrl}}/internal-providers
+Authorization: Bearer {{token}}
+
+# ── User Providers ───────────────────────────────────────────────────────────
+
+### GET /providers — List current user's providers
+GET {{baseUrl}}/providers
+Authorization: Bearer {{token}}
+
+### POST /providers — Create a new LLM provider
+POST {{baseUrl}}/providers
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "My OpenAI",
+  "config": {
+    "api_key": "sk-test123456789",
+    "base_url": "https://api.openai.com",
+    "model": "gpt-4o-mini"
+  }
+}
+
+### PUT /providers/{id}/default — Set a provider as default
+# Replace {{provider_id}} with an actual provider UUID
+PUT {{baseUrl}}/providers/{{provider_id}}
+Authorization: Bearer {{token}}
+
+### DELETE /providers/{id} — Delete a provider association
+# Replace {{provider_id}} with an actual provider UUID
+DELETE {{baseUrl}}/providers/{{provider_id}}
+Authorization: Bearer {{token}}

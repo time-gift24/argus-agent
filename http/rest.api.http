@@ -6,7 +6,7 @@
 ###   2. Set DEV_MODE=true and run the server:
 ###        cd backend && uvicorn main:app --reload --port 8000
 ###   3. Obtain a JWT:
-###        • Option A (recommended): run `POST /auth/callback` request below,
+###        • Option A (recommended): run `GET /auth/callback` request below,
 ###          copy the `token` value from the response, paste it into
 ###          the `YOUR_TOKEN_HERE` placeholder below, and remove this comment.
 ###        • Option B: open http://localhost:8000/docs and use "Try it out".
@@ -19,9 +19,9 @@
 
 # ── Auth ─────────────────────────────────────────────────────────────────────
 
-### POST /auth/callback — Dev login (get JWT)
+### GET /auth/callback — Dev login (get JWT)
 # Copy the "token" value from the response body into @token above
-POST {{baseUrl}}/auth/callback?code=dev&state=dev
+GET {{baseUrl}}/auth/callback?code=dev&state=dev
 X-Dev-User: alice
 
 ### GET /auth/login — Initiate OIDC flow (prod only; in dev mode redirects to callback)
@@ -30,12 +30,12 @@ GET {{baseUrl}}/auth/login?redirect_uri=/
 
 # ── Users ────────────────────────────────────────────────────────────────────
 
-### GET /users/me — Get current user
-GET {{baseUrl}}/users/me
+### GET /me — Get current user
+GET {{baseUrl}}/me
 Authorization: Bearer {{token}}
 
-### PATCH /users/me — Update current user name
-PATCH {{baseUrl}}/users/me
+### PATCH /me — Update current user name
+PATCH {{baseUrl}}/me
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -69,7 +69,7 @@ Content-Type: application/json
 
 ### PUT /providers/{id}/default — Set a provider as default
 # Replace {{provider_id}} with an actual provider UUID
-PUT {{baseUrl}}/providers/{{provider_id}}
+PUT {{baseUrl}}/providers/{{provider_id}}/default
 Authorization: Bearer {{token}}
 
 ### DELETE /providers/{id} — Delete a provider association

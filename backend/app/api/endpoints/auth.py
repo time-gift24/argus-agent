@@ -41,17 +41,11 @@ def _oidc_provider(dev_user_name: str | None = None) -> OIDCProvider:
 @router.get("/login", name="auth_login")
 def login(
     redirect_uri: str = Query(default="/"),
-    x_dev_user: str | None = Header(default=None, alias="X-Dev-User"),
 ) -> RedirectResponse:
     """
     Redirect to OIDC authorization endpoint (production) or bypass (dev).
     """
     if settings.is_dev_mode:
-        if not x_dev_user:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="X-Dev-User header required in dev mode",
-            )
         # Dev mode: skip OIDC, go straight to callback with fake code
         return RedirectResponse(
             url=f"/api/v1/auth/callback?code=dev&state=dev",

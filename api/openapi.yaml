@@ -47,6 +47,7 @@ paths:
       summary: Initiate OIDC login flow
       description: |
         In dev mode: redirects directly to `/auth/callback` with a dev bypass code.
+        `X-Dev-User` is validated at `/auth/callback`, not at `/auth/login`.
         In production: redirects to the OIDC provider's authorization endpoint.
         Sets a signed `oidc_state` cookie to protect against CSRF on callback.
       tags: [auth]
@@ -111,7 +112,7 @@ paths:
 
   # ── Users ───────────────────────────────────────────────────────────────────
 
-  /users/me:
+  /me:
     get:
       operationId: get_me
       summary: Get current user profile
@@ -147,7 +148,7 @@ paths:
     patch:
       operationId: patch_me
       summary: Update current user profile
-      description: Only the `name` field may be updated. Empty or whitespace-only names are rejected.
+      description: Only the `name` field may be updated.
       tags: [users]
       requestBody:
         required: true
@@ -164,8 +165,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserRead"
-        "400":
-          description: Name cannot be empty or whitespace-only
+        "422":
+          description: Validation error (e.g. empty name)
           content:
             application/json:
               schema:

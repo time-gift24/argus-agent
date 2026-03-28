@@ -4,6 +4,16 @@ from fastapi.testclient import TestClient
 
 
 class TestDevLoginFlow:
+    def test_dev_auth_login_redirects_without_header(self, client: TestClient):
+        """Dev mode /auth/login redirects to callback even without X-Dev-User header."""
+        resp = client.get(
+            "/api/v1/auth/login",
+            params={"redirect_uri": "/"},
+            follow_redirects=False,
+        )
+        assert resp.status_code == 302
+        assert resp.headers["location"] == "/api/v1/auth/callback?code=dev&state=dev"
+
     def test_dev_login_returns_valid_jwt(self, client: TestClient):
         """Dev mode login with X-Dev-User header returns a valid JWT."""
         resp = client.get(

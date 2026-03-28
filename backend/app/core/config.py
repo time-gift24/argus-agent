@@ -18,7 +18,7 @@ def _validate_aes_key(value: str) -> bytes:
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", case_sensitive=True)
+    model_config = SettingsConfigDict(env_file=".env.dev", case_sensitive=True)
 
     PROJECT_NAME: str = "argus-agents"
     VERSION: str = "0.1.0"

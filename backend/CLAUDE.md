@@ -20,7 +20,9 @@ Python 后端，基于 FastAPI + SQLAlchemy + SQLite。
 ```
 backend/
 ├── main.py                  # FastAPI app 入口，lifespan seed
-├── Makefile                 # make test / lint / fmt
+├── Makefile                 # make dev / test / lint / fmt
+├── .env.dev                 # 开发默认配置（已提交，make dev 自动加载）
+├── .env.example             # 生产部署模板（不含实际值）
 ├── alembic/                 # 数据库迁移
 ├── app/
 │   ├── api/
@@ -69,6 +71,15 @@ Request → CORS → Auth Deps (JWT → user_id) → Endpoint → SQLAlchemy →
 
 所有 Provider 的 config 字段用 AES-256-GCM 加密后存 DB，API 响应中永不含 config。
 
+## 快速开始
+
+```bash
+make dev           # 启动开发服务器 (http://localhost:8000)
+make test          # 跑全部测试
+```
+
+无需手动配置环境变量，`make dev` 自动从 `.env.dev` 加载开发默认值。
+
 ## 测试
 
 ```bash
@@ -96,6 +107,8 @@ make test-cov-open  # 生成 HTML 覆盖率报告
 | test_users.py | 集成 | PATCH /me, 忽略无关字段 |
 
 ## 环境变量
+
+配置加载优先级：**环境变量 > .env.dev 文件**。开发环境无需手动设置，`make dev` 自动加载 `.env.dev`。
 
 | 变量 | 必填 | 说明 |
 |------|------|------|

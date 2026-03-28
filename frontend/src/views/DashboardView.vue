@@ -1,159 +1,389 @@
 <template>
-  <div class="space-y-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-2xl font-bold tracking-tight text-text">仪表盘概览</h1>
-        <p class="text-sm text-text-muted mt-0.5">实时监控智能体运行状态</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface rounded-lg border border-border">
-          <div class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
-          <span class="text-[11px] font-semibold text-text-secondary">系统正常</span>
-        </div>
-      </div>
-    </div>
+  <div class="max-w-7xl mx-auto">
+    <!-- Hero Header -->
+    <header class="mb-12 max-w-5xl animate-fade-up">
+      <h1 class="font-headline text-5xl font-bold tracking-tight text-on-surface mb-4">
+        Active Agent <span class="text-primary">Operations</span>
+      </h1>
+      <p class="text-on-surface-variant text-lg max-w-2xl leading-relaxed">
+        Curating high-frequency decision loops across your distributed neural architecture. Monitoring {{ agentStore.agents.length }} concurrent streams.
+      </p>
+    </header>
 
-    <!-- Stat Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-      <div
-        v-for="(stat, i) in stats"
-        :key="i"
-        class="bg-surface rounded-xl border border-border shadow-card p-5 hover:shadow-panel transition-shadow cursor-pointer group"
-      >
-        <div class="flex items-start justify-between mb-4">
-          <div
-            class="w-10 h-10 rounded-lg flex items-center justify-center"
-            :class="stat.bgClass"
-          >
-            <component :is="stat.icon" class="w-5 h-5" :class="stat.iconClass" :stroke-width="2" />
+    <!-- Bento Grid -->
+    <div class="grid grid-cols-12 gap-6">
+
+      <!-- Hero Process Map -->
+      <div class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-[2rem] p-8 overflow-hidden relative shadow-sm border border-outline-variant/30 animate-fade-up animate-delay-1">
+        <div class="flex justify-between items-start mb-12">
+          <div>
+            <span class="text-[10px] font-bold tracking-[0.2em] text-primary uppercase block mb-1">Live Workflow</span>
+            <h2 class="text-2xl font-headline font-bold">Neural Distribution Map</h2>
           </div>
-          <span
-            class="text-[11px] font-semibold px-2 py-0.5 rounded-full"
-            :class="stat.badgeClass"
-          >{{ stat.badge }}</span>
-        </div>
-        <p class="text-2xl font-bold font-mono text-text">{{ stat.value }}</p>
-        <p class="text-xs font-medium text-text-muted mt-1">{{ stat.label }}</p>
-        <div class="mt-3 h-1 bg-surface-3 rounded-full overflow-hidden">
-          <div
-            class="h-full rounded-full transition-all duration-500"
-            :class="stat.barClass"
-            :style="{ width: stat.percent + '%' }"
-          ></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Activity & Quick Actions Row -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <!-- Recent Activity -->
-      <div class="lg:col-span-2 bg-surface rounded-xl border border-border shadow-card p-5">
-        <h2 class="text-sm font-bold text-text mb-4">最近活动</h2>
-        <div class="space-y-3">
-          <div v-for="(activity, i) in activities" :key="i" class="flex items-start gap-3">
-            <div class="w-2 h-2 rounded-full mt-1.5 shrink-0" :class="activity.dotClass"></div>
-            <div class="flex-1 min-w-0">
-              <p class="text-xs font-medium text-text">{{ activity.text }}</p>
-              <p class="text-[10px] text-text-muted font-mono mt-0.5">{{ activity.time }}</p>
-            </div>
-            <span class="text-[10px] font-semibold shrink-0" :class="activity.tagClass">{{ activity.tag }}</span>
+          <div class="flex gap-2">
+            <span class="flex items-center gap-1.5 px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded-full text-xs font-bold">
+              <span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim glow-pulse"></span>
+              STABLE
+            </span>
           </div>
         </div>
-      </div>
 
-      <!-- Quick Actions -->
-      <div class="bg-surface rounded-xl border border-border shadow-card p-5">
-        <h2 class="text-sm font-bold text-text mb-4">快捷操作</h2>
-        <div class="space-y-2">
-          <button
-            v-for="action in quickActions"
-            :key="action.label"
-            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-surface-3 group"
-          >
-            <div class="w-7 h-7 rounded-md flex items-center justify-center bg-primary/10 text-primary group-hover:bg-primary group-hover:text-white transition-colors">
-              <component :is="action.icon" class="w-3.5 h-3.5" :stroke-width="2.5" />
+        <!-- Process Map -->
+        <div class="relative h-64 flex items-center justify-center">
+          <div class="absolute inset-0 flex items-center justify-around px-12">
+            <!-- Node 1: INPUT -->
+            <div class="z-10 bg-white shadow-xl p-4 rounded-2xl flex flex-col items-center gap-2 transition-transform hover:scale-105">
+              <div class="w-12 h-12 rounded-full bg-primary-fixed flex items-center justify-center text-primary">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                </svg>
+              </div>
+              <span class="text-[10px] font-bold text-on-surface-variant">INPUT</span>
             </div>
-            <div>
-              <p class="text-xs font-semibold text-text">{{ action.label }}</p>
-              <p class="text-[10px] text-text-muted">{{ action.sub }}</p>
+
+            <!-- Flow Line 1 -->
+            <div class="h-[2px] flex-grow bg-gradient-to-r from-primary-fixed-dim via-primary to-primary-container relative">
+              <div class="absolute -top-1 left-1/2 w-2 h-2 rounded-full bg-white border-2 border-primary"></div>
             </div>
-          </button>
+
+            <!-- Node 2: Azure Core (Glassmorphic) -->
+            <div class="z-10 glass-panel shadow-2xl p-6 rounded-[2rem] flex flex-col items-center gap-3 ring-1 ring-primary/10 scale-110">
+              <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-primary to-primary-container flex items-center justify-center text-white shadow-lg">
+                <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2a8 8 0 0 1 8 8v4a8 8 0 0 1-16 0v-4a8 8 0 0 1 8-8z"/>
+                  <path d="M9 12h.01M15 12h.01"/>
+                </svg>
+              </div>
+              <div class="text-center">
+                <span class="text-xs font-bold text-primary uppercase tracking-tighter">Azure Core</span>
+                <p class="text-[10px] text-on-surface-variant">Processing...</p>
+              </div>
+            </div>
+
+            <!-- Flow Line 2 -->
+            <div class="h-[2px] flex-grow bg-gradient-to-r from-primary-container via-primary-fixed-dim to-slate-200"></div>
+
+            <!-- Node 3: OUTPUT -->
+            <div class="z-10 bg-white shadow-xl p-4 rounded-2xl flex flex-col items-center gap-2 transition-transform hover:scale-105 opacity-60">
+              <div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/>
+                  <path d="M12 12v9"/>
+                  <path d="m8 17 4 4 4-4"/>
+                </svg>
+              </div>
+              <span class="text-[10px] font-bold text-on-surface-variant">OUTPUT</span>
+            </div>
+          </div>
+
+          <!-- Decorative Background Waves -->
+          <svg class="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 800 200">
+            <path d="M0,100 C150,50 350,150 500,100 C650,50 800,100 800,100" fill="none" stroke="#003ec7" stroke-width="2"/>
+            <path d="M0,120 C150,70 350,170 500,120 C650,70 800,120 800,120" fill="none" stroke="#0052ff" stroke-width="1"/>
+          </svg>
         </div>
       </div>
+
+      <!-- Performance Analytics (Right Column) -->
+      <div class="col-span-12 lg:col-span-4 space-y-6 animate-fade-up animate-delay-2">
+        <!-- Throughput Chart -->
+        <div class="bg-surface-container-lowest rounded-[2rem] p-6 shadow-sm border border-outline-variant/30">
+          <h3 class="font-headline font-bold text-lg mb-6 flex justify-between items-center">
+            Throughput
+            <svg class="w-4 h-4 text-on-surface-variant" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
+            </svg>
+          </h3>
+          <div class="flex items-end gap-2 h-32 mb-4 px-2">
+            <div v-for="(bar, i) in throughputBars" :key="i"
+              class="w-full rounded-t-lg transition-all duration-300 hover:opacity-80"
+              :class="bar.color"
+              :style="{ height: bar.height + '%' }"
+            ></div>
+          </div>
+          <div class="flex justify-between text-[10px] font-bold text-on-surface-variant uppercase tracking-widest px-1">
+            <span>08:00</span>
+            <span>12:00</span>
+            <span>16:00</span>
+          </div>
+        </div>
+
+        <!-- System Health Card -->
+        <div class="bg-primary text-on-primary rounded-[2rem] p-6 shadow-lg relative overflow-hidden">
+          <div class="relative z-10">
+            <p class="text-[10px] font-bold tracking-widest uppercase opacity-70 mb-1">System Health</p>
+            <h4 class="text-3xl font-headline font-bold">99.98%</h4>
+            <div class="mt-4 flex items-center gap-2">
+              <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">Optimized</span>
+            </div>
+          </div>
+          <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-primary-container rounded-full blur-3xl opacity-50"></div>
+        </div>
+      </div>
+
+      <!-- Agent Registry Section -->
+      <div class="col-span-12 animate-fade-up animate-delay-3">
+        <div class="flex justify-between items-end mb-6">
+          <div>
+            <h2 class="text-3xl font-headline font-bold tracking-tight">Agent Registry</h2>
+            <p class="text-on-surface-variant text-sm">Real-time status of your deployed intelligence nodes.</p>
+          </div>
+          <div class="flex gap-4">
+            <tiny-button plain>
+              <span class="text-xs font-bold">Filter: All</span>
+            </tiny-button>
+            <tiny-button plain>
+              <span class="text-xs font-bold">Sort: Performance</span>
+            </tiny-button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <!-- Agent Card: Active -->
+          <div
+            v-for="agent in agents"
+            :key="agent.id"
+            class="bg-surface-container-lowest p-6 rounded-[2rem] shadow-sm relative group hover:shadow-xl transition-all duration-300 border border-outline-variant/30"
+          >
+            <!-- Status Badge -->
+            <div class="absolute top-6 right-6">
+              <span class="flex items-center gap-1 text-[10px] font-bold" :class="agent.statusClass">
+                <span class="w-2 h-2 rounded-full" :class="[agent.dotClass, agent.status === 'Active' ? 'glow-pulse' : '']"></span>
+                {{ agent.status.toUpperCase() }}
+              </span>
+            </div>
+
+            <!-- Agent Info -->
+            <div class="flex items-start gap-4 mb-6">
+              <div class="w-14 h-14 rounded-2xl overflow-hidden shadow-inner bg-surface-container flex items-center justify-center text-primary text-2xl font-headline font-bold">
+                {{ agent.avatar }}
+              </div>
+              <div>
+                <h4 class="font-headline font-bold text-lg leading-tight">{{ agent.name }}</h4>
+                <p class="text-xs text-on-surface-variant font-medium">{{ agent.role }}</p>
+              </div>
+            </div>
+
+            <!-- Metric -->
+            <div class="space-y-3 mb-6">
+              <div class="flex justify-between text-xs">
+                <span class="text-on-surface-variant">{{ agent.metricLabel }}</span>
+                <span class="font-bold">{{ agent.metricValue }}</span>
+              </div>
+              <div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+                <div
+                  class="h-full rounded-full transition-all duration-500"
+                  :class="agent.barColor"
+                  :style="{ width: agent.metricPercent + '%' }"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2">
+              <button class="flex-grow py-2 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                :class="agent.status === 'Idle' ? 'bg-primary text-on-primary hover:bg-primary-container' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'"
+              >
+                {{ agent.primaryAction }}
+              </button>
+              <button class="px-3 py-2 rounded-xl bg-surface-container text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                  <polyline points="15 3 21 3 21 9"/>
+                  <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Elite Card: Vanguard-Alpha -->
+          <div class="bg-surface-container-lowest p-6 rounded-[2rem] shadow-sm relative overflow-hidden group hover:shadow-xl transition-all duration-300 border border-outline-variant/30">
+            <div class="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-bl-[4rem]"></div>
+            <div class="absolute top-6 right-6">
+              <span class="flex items-center gap-1 text-[10px] font-bold text-primary">
+                <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2L9 9l-7 1 5 5-1.5 7L12 18.5 18.5 22 17 15l5-5-7-1z"/>
+                </svg>
+                ELITE
+              </span>
+            </div>
+            <div class="flex items-start gap-4 mb-6">
+              <div class="w-14 h-14 rounded-2xl overflow-hidden shadow-inner bg-surface-container flex items-center justify-center text-primary text-2xl font-headline font-bold">
+                V
+              </div>
+              <div>
+                <h4 class="font-headline font-bold text-lg leading-tight">Vanguard-Alpha</h4>
+                <p class="text-xs text-on-surface-variant font-medium">Security & Breach Defense</p>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mb-6">
+              <div class="bg-surface-container p-3 rounded-2xl">
+                <p class="text-[10px] text-on-surface-variant font-bold uppercase mb-1">Success</p>
+                <p class="text-xl font-headline font-bold text-primary">100%</p>
+              </div>
+              <div class="bg-surface-container p-3 rounded-2xl">
+                <p class="text-[10px] text-on-surface-variant font-bold uppercase mb-1">Latency</p>
+                <p class="text-xl font-headline font-bold text-primary">8ms</p>
+              </div>
+            </div>
+            <button class="w-full py-2.5 rounded-xl border border-primary/20 text-primary text-xs font-bold hover:bg-primary/5 transition-colors cursor-pointer">
+              Full Analytics
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Execution Loops Table -->
+      <div class="col-span-12 bg-surface-container-lowest rounded-[2rem] p-8 shadow-sm border border-outline-variant/30 animate-fade-up animate-delay-4">
+        <div class="flex justify-between items-center mb-8">
+          <h3 class="font-headline text-2xl font-bold">Recent Execution Loops</h3>
+          <tiny-button type="text">
+            <span class="text-sm text-primary font-bold flex items-center gap-1">
+              View Full Logs
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="9 18 15 12 9 6"/>
+              </svg>
+            </span>
+          </tiny-button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <tiny-grid :data="executions" border resizable auto-resize>
+            <tiny-grid-column field="id" title="ID" width="100">
+              <template #default="{ row }">
+                <span class="text-xs font-mono text-on-surface-variant">{{ row.id }}</span>
+              </template>
+            </tiny-grid-column>
+
+            <tiny-grid-column field="processName" title="Process Name">
+              <template #default="{ row }">
+                <span class="text-sm font-bold">{{ row.processName }}</span>
+              </template>
+            </tiny-grid-column>
+
+            <tiny-grid-column field="initiator" title="Initiator" width="140">
+              <template #default="{ row }">
+                <div class="flex items-center gap-2">
+                  <div class="w-6 h-6 rounded-full" :class="row.initiatorBg"></div>
+                  <span class="text-xs">{{ row.initiator }}</span>
+                </div>
+              </template>
+            </tiny-grid-column>
+
+            <tiny-grid-column field="runtime" title="Runtime" width="100">
+              <template #default="{ row }">
+                <span class="text-xs">{{ row.runtime }}</span>
+              </template>
+            </tiny-grid-column>
+
+            <tiny-grid-column field="confidence" title="Confidence" width="140">
+              <template #default="{ row }">
+                <div class="flex items-center gap-2">
+                  <div class="w-16 h-1 bg-surface-container rounded-full overflow-hidden">
+                    <div class="bg-primary h-full" :style="{ width: row.confidence + '%' }"></div>
+                  </div>
+                  <span class="text-[10px] font-bold text-primary">{{ row.confidence }}%</span>
+                </div>
+              </template>
+            </tiny-grid-column>
+
+            <tiny-grid-column field="result" title="Result" width="100">
+              <template #default="{ row }">
+                <span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed rounded text-[10px] font-bold uppercase">{{ row.result }}</span>
+              </template>
+            </tiny-grid-column>
+          </tiny-grid>
+        </div>
+      </div>
+
     </div>
   </div>
 </template>
 
 <script setup>
-import { markRaw } from 'vue'
-import {
-  Cpu,
-  Zap,
-  Clock,
-  Activity,
-  Plus,
-  RefreshCw,
-  Settings,
-} from 'lucide-vue-next'
+import { Grid as TinyGrid, GridColumn as TinyGridColumn, Button as TinyButton } from '@opentiny/vue'
+import { useAgentStore } from '../stores/agents'
 
-// @mock — 仪表盘统计数据、最近活动、快捷操作全部硬编码；替换为：GET /api/dashboard
-const stats = [
+const agentStore = useAgentStore()
+
+const throughputBars = [
+  { height: 40, color: 'bg-primary-fixed-dim' },
+  { height: 65, color: 'bg-primary' },
+  { height: 50, color: 'bg-primary-container' },
+  { height: 85, color: 'bg-primary' },
+  { height: 60, color: 'bg-primary-fixed-dim' },
+  { height: 45, color: 'bg-primary' },
+  { height: 75, color: 'bg-primary-container' },
+]
+
+const agents = [
   {
-    label: '运行中的智能体',
-    value: '12',
-    badge: '+3 本周',
-    badgeClass: 'bg-success/10 text-success',
-    icon: markRaw(Cpu),
-    bgClass: 'bg-primary/10',
-    iconClass: 'text-primary',
-    barClass: 'bg-primary',
-    percent: 75,
+    id: 1,
+    name: 'Lumina-4',
+    avatar: 'L4',
+    role: 'Market Sentiment Analyst',
+    status: 'Active',
+    statusClass: 'text-tertiary-fixed-dim',
+    dotClass: 'bg-tertiary-fixed-dim',
+    metricLabel: 'Cognitive Load',
+    metricValue: '42%',
+    metricPercent: 42,
+    barColor: 'bg-primary',
+    primaryAction: 'Configure',
   },
   {
-    label: '总任务处理量',
-    value: '8,241',
-    badge: '+18%',
-    badgeClass: 'bg-primary/10 text-primary',
-    icon: markRaw(Zap),
-    bgClass: 'bg-amber-50',
-    iconClass: 'text-amber-500',
-    barClass: 'bg-amber-400',
-    percent: 82,
-  },
-  {
-    label: '平均响应时间',
-    value: '94ms',
-    badge: '-12ms',
-    badgeClass: 'bg-success/10 text-success',
-    icon: markRaw(Activity),
-    bgClass: 'bg-emerald-50',
-    iconClass: 'text-emerald-500',
-    barClass: 'bg-success',
-    percent: 40,
-  },
-  {
-    label: '系统运行时长',
-    value: '14天',
-    badge: '稳定',
-    badgeClass: 'bg-success/10 text-success',
-    icon: markRaw(Clock),
-    bgClass: 'bg-indigo-50',
-    iconClass: 'text-indigo-500',
-    barClass: 'bg-indigo-400',
-    percent: 92,
+    id: 2,
+    name: 'Nexus-7',
+    avatar: 'N7',
+    role: 'Data Pipeline Orchestrator',
+    status: 'Idle',
+    statusClass: 'text-on-surface-variant',
+    dotClass: 'bg-slate-300',
+    metricLabel: 'Uptime',
+    metricValue: '14d 2h',
+    metricPercent: 100,
+    barColor: 'bg-slate-300',
+    primaryAction: 'Wake Agent',
   },
 ]
 
-const activities = [
-  { text: 'Agent-003 成功处理任务 #2048', time: '2 分钟前', tag: '成功', tagClass: 'text-success bg-success/10 px-1.5 py-0.5 rounded', dotClass: 'bg-success' },
-  { text: 'Agent-007 异常重启，已恢复', time: '11 分钟前', tag: '已恢复', tagClass: 'text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded', dotClass: 'bg-amber-400' },
-  { text: '新增工具插件 "网页抓取" 已注册', time: '38 分钟前', tag: '新插件', tagClass: 'text-primary bg-primary/10 px-1.5 py-0.5 rounded', dotClass: 'bg-primary' },
-  { text: 'Agent-001 - Agent-005 批量更新完成', time: '2 小时前', tag: '完成', tagClass: 'text-text-muted bg-surface-3 px-1.5 py-0.5 rounded', dotClass: 'bg-text-muted' },
-]
-
-const quickActions = [
-  { label: '创建新智能体', sub: '快速启动一个全新智能体', icon: markRaw(Plus) },
-  { label: '批量刷新状态', sub: '更新所有智能体运行状态', icon: markRaw(RefreshCw) },
-  { label: '系统设置', sub: '配置全局参数与权限', icon: markRaw(Settings) },
+const executions = [
+  {
+    id: '#AX-2094',
+    processName: 'Market Rebalancing Loop',
+    initiator: 'Lumina-4',
+    initiatorBg: 'bg-primary-fixed',
+    runtime: '142ms',
+    confidence: 98,
+    result: 'Success',
+  },
+  {
+    id: '#AX-2093',
+    processName: 'Cross-Chain Audit',
+    initiator: 'Nexus-7',
+    initiatorBg: 'bg-slate-200',
+    runtime: '1,204ms',
+    confidence: 82,
+    result: 'Success',
+  },
+  {
+    id: '#AX-2092',
+    processName: 'Threat Vector Analysis',
+    initiator: 'Vanguard-Alpha',
+    initiatorBg: 'bg-primary-fixed',
+    runtime: '67ms',
+    confidence: 100,
+    result: 'Success',
+  },
+  {
+    id: '#AX-2091',
+    processName: 'Sentiment Aggregation',
+    initiator: 'Lumina-4',
+    initiatorBg: 'bg-primary-fixed',
+    runtime: '234ms',
+    confidence: 91,
+    result: 'Success',
+  },
 ]
 </script>

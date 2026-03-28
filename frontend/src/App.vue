@@ -1,146 +1,227 @@
 <template>
-  <div class="flex h-screen bg-background overflow-hidden relative">
+  <div class="min-h-screen bg-surface architectural-grid font-body text-on-surface">
 
-    <!-- Mobile Sidebar Backdrop -->
-    <Transition name="backdrop">
-      <div
-        v-if="isSidebarOpen"
-        class="fixed inset-0 bg-[#0F172A]/50 z-40 lg:hidden backdrop-blur-sm"
-        @click="isSidebarOpen = false"
-      ></div>
-    </Transition>
+    <!-- Top Navigation Bar -->
+    <nav class="fixed top-0 w-full h-16 flex items-center justify-between px-6 bg-surface-container-low/70 backdrop-blur-xl z-50 shadow-sm border-b border-outline-variant/30">
+      <div class="flex items-center gap-4 min-w-[200px]">
+        <button
+          class="text-on-surface-variant hover:text-primary transition-colors p-1 cursor-pointer"
+          @click="toggleSidebar"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+          </svg>
+        </button>
+        <span class="text-xl font-bold text-primary font-headline tracking-tight">Axiom Azure</span>
+      </div>
+
+      <div class="hidden md:flex items-center gap-8 justify-center flex-1">
+        <router-link
+          v-for="link in navLinks"
+          :key="link.path"
+          :to="link.path"
+          class="font-headline tracking-tight transition-colors duration-200 text-sm"
+          :class="[isActiveRoute(link.path)
+            ? 'text-primary border-b-2 border-primary font-semibold'
+            : 'text-on-surface-variant hover:text-primary']"
+        >
+          {{ link.name }}
+        </router-link>
+      </div>
+
+      <div class="flex items-center gap-4 min-w-[200px] justify-end">
+        <div class="hidden sm:flex items-center bg-surface-container-low px-3 py-1.5 rounded-full gap-2 text-on-surface-variant border border-outline-variant/30">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            class="bg-transparent border-none focus:outline-none text-sm w-32 xl:w-48 font-label"
+            placeholder="Search..."
+            type="text"
+          />
+        </div>
+
+        <button class="relative text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+          </svg>
+          <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-error rounded-full"></span>
+        </button>
+
+        <tiny-button type="primary" round>
+          <span class="font-headline font-semibold">Deploy Agent</span>
+        </tiny-button>
+      </div>
+    </nav>
 
     <!-- Sidebar -->
     <aside
-      class="fixed inset-y-0 left-0 w-[248px] flex flex-col z-50 transition-transform duration-300 transform lg:relative lg:translate-x-0 bg-surface border-r border-border"
-      :class="[isSidebarOpen ? 'translate-x-0 shadow-[8px_0_24px_rgba(0,0,0,0.12)]' : '-translate-x-full']"
+      class="fixed left-0 top-0 h-screen p-4 flex flex-col justify-between bg-surface-container-low border-r border-outline-variant/30 z-[60] sidebar-transition overflow-hidden"
+      :class="isCollapsed ? 'w-20' : 'w-64'"
     >
-      <!-- Logo Area -->
-      <div class="px-5 py-5 flex items-center justify-between border-b border-border">
-        <div class="flex items-center gap-3">
-          <div class="w-8 h-8 bg-primary rounded-[8px] flex items-center justify-center text-white shadow-sm shadow-primary/30">
-            <svg class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <div class="space-y-6">
+        <div
+          class="flex items-center gap-3 px-2 h-16 mb-2"
+          :class="isCollapsed ? 'justify-center' : ''"
+        >
+          <div class="w-10 h-10 min-w-[40px] rounded-lg bg-primary flex items-center justify-center text-on-primary">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <rect x="4" y="4" width="16" height="16" rx="2"/>
               <path d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01"/>
             </svg>
           </div>
-          <div class="leading-tight">
-            <span class="text-[15px] font-bold tracking-tight text-text">Argus</span>
-            <span class="block text-[10px] font-medium text-text-muted -mt-0.5">智能体平台</span>
+          <div v-if="!isCollapsed" class="overflow-hidden">
+            <h3 class="font-headline font-bold text-sm leading-tight whitespace-nowrap">Core Engine</h3>
+            <p class="text-[10px] text-on-surface-variant tracking-wider uppercase">v2.4.0 Active</p>
           </div>
         </div>
-        <button @click="isSidebarOpen = false" class="hidden lg:block p-1 text-text-muted hover:text-text transition-colors rounded-md hover:bg-surface-3">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 6L6 18M6 6l12 12"/>
-          </svg>
-        </button>
+
+        <nav class="space-y-1">
+          <router-link
+            v-for="item in sidebarItems"
+            :key="item.path"
+            :to="item.path"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 overflow-hidden"
+            :class="[
+              isCollapsed ? 'justify-center' : '',
+              isActiveRoute(item.path)
+                ? 'bg-white text-primary shadow-sm'
+                : 'text-on-surface-variant hover:bg-surface-container'
+            ]"
+          >
+            <component :is="item.icon" class="w-5 h-5 min-w-[20px]" />
+            <span v-if="!isCollapsed" class="whitespace-nowrap">{{ item.name }}</span>
+          </router-link>
+        </nav>
+
+        <div v-if="!isCollapsed" class="pt-4 flex justify-center">
+          <button class="w-full py-3 border-2 border-dashed border-outline-variant text-outline hover:border-primary hover:text-primary rounded-xl text-xs font-bold transition-colors uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span class="whitespace-nowrap">New Module</span>
+          </button>
+        </div>
       </div>
 
-      <!-- Section Label -->
-      <div class="px-5 pt-5 pb-2">
-        <span class="text-[10px] font-semibold text-text-muted uppercase tracking-widest">导航</span>
-      </div>
-
-      <nav class="px-3 flex-1 space-y-0.5 overflow-y-auto">
-        <router-link
-          v-for="item in menuItems"
-          :key="item.path"
-          :to="item.path"
-          class="flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 group relative"
-          :class="[$route.path.startsWith(item.path) ? 'bg-primary/10 text-primary' : 'text-text-secondary hover:bg-surface-3 hover:text-text']"
-          @click="isSidebarOpen = false"
+      <div class="space-y-1 border-t border-outline-variant/30 pt-4">
+        <a
+          v-for="f in footerItems"
+          :key="f.name"
+          class="flex items-center gap-3 px-3 py-2 text-on-surface-variant text-sm font-medium transition-colors overflow-hidden cursor-pointer"
+          :class="[isCollapsed ? 'justify-center' : '', f.class]"
         >
-          <!-- Active indicator -->
-          <div
-            v-if="$route.path.startsWith(item.path)"
-            class="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-primary rounded-r-full"
-          ></div>
-
-          <component :is="item.icon" class="w-[18px] h-[18px] shrink-0" :stroke-width="$route.path.startsWith(item.path) ? 2.5 : 2" />
-
-          <span class="text-[13px] font-semibold">{{ item.name }}</span>
-
-          <!-- Active dot -->
-          <div
-            v-if="$route.path.startsWith(item.path)"
-            class="ml-auto w-1.5 h-1.5 rounded-full bg-primary"
-          ></div>
-        </router-link>
-      </nav>
-
-      <!-- Footer -->
-      <div class="p-4 border-t border-border">
-        <div class="flex items-center justify-between px-3 py-2">
-          <span class="text-[11px] font-medium text-text-muted">v0.1.0-alpha</span>
-          <div class="flex items-center gap-1">
-            <div class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
-            <span class="text-[11px] font-medium text-success">运行中</span>
-          </div>
-        </div>
+          <component :is="f.icon" class="w-5 h-5 min-w-[20px]" />
+          <span v-if="!isCollapsed" class="whitespace-nowrap">{{ f.name }}</span>
+        </a>
       </div>
     </aside>
 
-    <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+    <!-- Main Content -->
+    <main
+      class="pt-24 px-8 pb-12 main-transition min-h-screen"
+      :class="isCollapsed ? 'ml-20' : 'ml-64'"
+    >
+      <router-view v-slot="{ Component }">
+        <Transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </Transition>
+      </router-view>
+    </main>
 
-      <!-- Header -->
-      <header class="h-14 bg-surface border-b border-border flex items-center justify-between px-5 lg:px-8 shrink-0">
-        <div class="flex items-center gap-4 flex-1">
-          <button
-            @click="isSidebarOpen = true"
-            class="lg:hidden p-1.5 -ml-1.5 text-text-muted hover:text-text hover:bg-surface-3 rounded-md transition-colors"
-          >
-            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="3" y1="6" x2="21" y2="6"/>
-              <line x1="3" y1="12" x2="21" y2="12"/>
-              <line x1="3" y1="18" x2="21" y2="18"/>
-            </svg>
-          </button>
-          <GlobalHeader />
-        </div>
-      </header>
-
-      <!-- Main Scrollable Area -->
-      <main class="flex-1 overflow-y-auto p-5 lg:p-8">
-        <router-view v-slot="{ Component }">
-          <Transition name="fade" mode="out-in">
-            <component :is="Component" />
-          </Transition>
-        </router-view>
-      </main>
+    <!-- FAB -->
+    <div class="fixed bottom-8 right-8 z-50">
+      <button class="w-14 h-14 bg-primary text-on-primary rounded-2xl shadow-2xl flex items-center justify-center transition-transform hover:scale-110 active:scale-95 cursor-pointer">
+        <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, markRaw } from 'vue'
-import {
-  Cpu,
-  Wrench,
-  Terminal,
-  FileText,
-  Settings,
-} from 'lucide-vue-next'
-import GlobalHeader from './components/GlobalHeader.vue'
+import { useRoute } from 'vue-router'
+import { Button as TinyButton } from '@opentiny/vue'
 
-const isSidebarOpen = ref(false)
+const route = useRoute()
+const isCollapsed = ref(false)
 
-const menuItems = [
-  { name: '智能体管理', path: '/agents', icon: markRaw(Cpu) },
-  { name: '工具箱',     path: '/tools', icon: markRaw(Wrench) },
-  { name: '交互控制台', path: '/shell', icon: markRaw(Terminal) },
-  { name: '系统日志',   path: '/logs', icon: markRaw(FileText) },
-  { name: '系统设置',   path: '/settings', icon: markRaw(Settings) },
+const toggleSidebar = () => {
+  isCollapsed.value = !isCollapsed.value
+}
+
+const isActiveRoute = (path) => {
+  if (path === '/') return route.path === '/'
+  return route.path.startsWith(path)
+}
+
+const navLinks = [
+  { name: 'Dashboard', path: '/dashboard' },
+  { name: 'Agents', path: '/agents' },
+  { name: 'Workflows', path: '/tools' },
+  { name: 'Analytics', path: '/logs' },
+]
+
+const sidebarItems = [
+  {
+    name: 'Fleet Overview',
+    path: '/dashboard',
+    icon: markRaw({
+      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`
+    })
+  },
+  {
+    name: 'Logic Designer',
+    path: '/tools',
+    icon: markRaw({
+      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><line x1="12" y1="8" x2="5" y2="16"/><line x1="12" y1="8" x2="19" y2="16"/></svg>`
+    })
+  },
+  {
+    name: 'Memory Vault',
+    path: '/shell',
+    icon: markRaw({
+      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`
+    })
+  },
+  {
+    name: 'API Keys',
+    path: '/agents',
+    icon: markRaw({
+      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>`
+    })
+  },
+  {
+    name: 'System Logs',
+    path: '/logs',
+    icon: markRaw({
+      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`
+    })
+  },
+]
+
+const footerItems = [
+  {
+    name: 'Help Center',
+    class: 'hover:text-primary',
+    icon: markRaw({
+      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
+    })
+  },
+  {
+    name: 'Logout',
+    class: 'hover:text-error',
+    icon: markRaw({
+      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`
+    })
+  },
 ]
 </script>
-
-<style scoped>
-.backdrop-enter-active,
-.backdrop-leave-active {
-  transition: opacity 200ms ease;
-}
-.backdrop-enter-from,
-.backdrop-leave-to {
-  opacity: 0;
-}
-</style>

@@ -1,3 +1,4 @@
+<!-- @mock — agent 详情、metrics 趋势值/百分比、运行日志、配置信息均为硬编码；替换为：GET /api/agents/:id + WebSocket 实时日志 -->
 <template>
   <div class="space-y-6">
     <!-- Breadcrumbs/Back -->

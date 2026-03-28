@@ -37,6 +37,7 @@
 
       <div class="w-px h-5 bg-border hidden sm:block"></div>
 
+      <!-- @mock — 用户名"管理员"、角色"超级权限"、头像 URL 均为硬编码；替换为：登录态 /api/user/profile -->
       <!-- User Avatar -->
       <div class="flex items-center gap-2.5 cursor-pointer group">
         <div class="text-right hidden sm:block">

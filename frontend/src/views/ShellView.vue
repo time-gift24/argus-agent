@@ -152,6 +152,7 @@ const executeCommand = async () => {
       history.value = []
       input.value = ''
       return
+    // @mock — list/status 命令返回硬编码数据；替换为：调用后端 API 或 WebSocket
     case 'list':
       output = `ID   名称           状态
   1   Agent-001      运行中

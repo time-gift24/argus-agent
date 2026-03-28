@@ -1,3 +1,4 @@
+<!-- @mock — 6 张占位卡片，无真实工具数据；替换为：GET /api/tools -->
 <template>
   <div>
     <h1 class="text-3xl font-bold mb-6">工具箱</h1>

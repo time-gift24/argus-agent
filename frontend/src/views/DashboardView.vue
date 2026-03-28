@@ -96,6 +96,7 @@ import {
   Settings,
 } from 'lucide-vue-next'
 
+// @mock — 仪表盘统计数据、最近活动、快捷操作全部硬编码；替换为：GET /api/dashboard
 const stats = [
   {
     label: '运行中的智能体',

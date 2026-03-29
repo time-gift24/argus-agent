@@ -3,7 +3,7 @@
 # ─── Development ──────────────────────────────────────────────────────────────
 
 .PHONY: dev
-dev: ## Start backend + frontend concurrently
+dev: sync-deps ## Start backend + frontend concurrently
 	@echo "Starting argus-agent dev environment..."
 	$(MAKE) -j2 dev-backend dev-frontend
 
@@ -15,10 +15,13 @@ dev-backend: ## Start backend dev server (port 8000)
 dev-frontend: ## Start frontend dev server (port 5173)
 	cd frontend && $(MAKE) dev
 
-.PHONY: install
-install: ## Install all dependencies
+.PHONY: sync-deps
+sync-deps: ## Sync backend + frontend dependencies
 	cd backend && $(MAKE) install-dev
 	cd frontend && $(MAKE) install
+
+.PHONY: install
+install: sync-deps ## Install all dependencies
 
 # ─── Help ─────────────────────────────────────────────────────────────────────
 

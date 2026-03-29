@@ -17,8 +17,8 @@ const routes = [
   { path: '/shell', component: ShellView },
   { path: '/logs', component: LogsView },
   { path: '/providers', component: () => import('../views/ProvidersView.vue') },
-  { path: '/providers/new', component: () => import('../views/ProviderEditView.vue') },
-  { path: '/providers/:id/edit', component: () => import('../views/ProviderEditView.vue') },
+  { path: '/providers/new', component: () => import('../views/ProviderEditView.vue'), meta: { requiresAuth: true } },
+  { path: '/providers/:id/edit', component: () => import('../views/ProviderEditView.vue'), meta: { requiresAuth: true } },
   { path: '/settings', component: SettingsView },
 ]
 
@@ -28,10 +28,15 @@ const router = createRouter({
 })
 
 // DevMode: no forced redirect, just ensure user store is initialized
-router.beforeEach(async () => {
+router.beforeEach(async (to) => {
   const userStore = useUserStore()
   if (userStore.isLoggedIn && !userStore.profile) {
     await userStore.fetchProfile()
+  }
+
+  if (to.meta.requiresAuth && !userStore.isLoggedIn) {
+    window.dispatchEvent(new CustomEvent('auth:required'))
+    return '/providers'
   }
 })
 

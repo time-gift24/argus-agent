@@ -1,36 +1,12 @@
 <!-- @mock — agent 详情、metrics 趋势值/百分比、运行日志、配置信息均为硬编码；替换为：GET /api/agents/:id + WebSocket 实时日志 -->
 <template>
-  <div class="max-w-7xl mx-auto space-y-6">
-    <!-- Breadcrumbs -->
-    <div class="flex items-center gap-2 text-sm animate-fade-up">
-      <router-link to="/agents" class="text-on-surface-variant hover:text-primary transition-colors">智能体管理</router-link>
-      <svg class="w-4 h-4 text-on-surface-variant" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="9 18 15 12 9 6"/>
-      </svg>
-      <span class="font-bold text-on-surface font-headline">{{ agent?.name || '加载中...' }}</span>
-    </div>
-
-    <!-- Agent Header -->
-    <div class="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/30 shadow-sm flex items-center justify-between animate-fade-up animate-delay-1">
-      <div class="flex items-center gap-4">
-        <div class="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center text-primary">
-          <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="4" width="16" height="16" rx="2"/>
-            <path d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01"/>
-          </svg>
-        </div>
-        <div>
-          <h1 class="text-2xl font-headline font-bold tracking-tight text-on-surface">{{ agent?.name }}</h1>
-          <div class="flex items-center gap-3 mt-1">
-            <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold" :class="statusBadgeClass(agent?.status)">
-              <div class="w-1.5 h-1.5 rounded-full" :class="statusDotClass(agent?.status)"></div>
-              <span class="uppercase tracking-wider">{{ agent?.status }}</span>
-            </div>
-            <span class="text-xs text-on-surface-variant font-mono">ID: {{ agent?.id }}</span>
-          </div>
-        </div>
-      </div>
-
+  <PageBodyShell
+    :breadcrumbs="breadcrumbs"
+    content-class="space-y-6"
+    description="查看单个智能体的运行状态、核心指标、日志与配置。"
+    :title="agent?.name || '加载中...'"
+  >
+    <template #actions>
       <div class="flex items-center gap-2">
         <tiny-button type="primary">
           <span class="flex items-center gap-1">
@@ -50,13 +26,33 @@
             重启
           </span>
         </tiny-button>
-        <div class="w-px h-8 bg-outline-variant/30 mx-2"></div>
         <tiny-button type="danger" ghost>
           <span class="flex items-center gap-1">
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
             删除
           </span>
         </tiny-button>
+      </div>
+    </template>
+
+    <div class="bg-surface-container-lowest p-6 rounded-[2rem] border border-outline-variant/30 shadow-sm flex items-center animate-fade-up animate-delay-1">
+      <div class="flex items-center gap-4">
+        <div class="w-16 h-16 rounded-2xl bg-primary-fixed flex items-center justify-center text-primary">
+          <svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="4" y="4" width="16" height="16" rx="2"/>
+            <path d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-2xl font-headline font-bold tracking-tight text-on-surface">{{ agent?.name }}</h1>
+          <div class="flex items-center gap-3 mt-1">
+            <div class="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold" :class="statusBadgeClass(agent?.status)">
+              <div class="w-1.5 h-1.5 rounded-full" :class="statusDotClass(agent?.status)"></div>
+              <span class="uppercase tracking-wider">{{ agent?.status }}</span>
+            </div>
+            <span class="text-xs text-on-surface-variant font-mono">ID: {{ agent?.id }}</span>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -117,7 +113,7 @@
         </tiny-tab-item>
       </tiny-tabs>
     </div>
-  </div>
+  </PageBodyShell>
 </template>
 
 <script setup>
@@ -127,6 +123,8 @@ import {
   Tabs as TinyTabs, TabItem as TinyTabItem,
   Button as TinyButton
 } from '@opentiny/vue'
+import PageBodyShell from '../components/PageBodyShell.vue'
+import { breadcrumb } from '../utils/pageShell'
 import { useAgentStore } from '../stores/agents'
 
 const route = useRoute()
@@ -134,6 +132,10 @@ const agentStore = useAgentStore()
 
 const activeTab = ref('perf')
 const agent = computed(() => agentStore.agents.find(a => a.id === route.params.id))
+const breadcrumbs = computed(() => [
+  breadcrumb('智能体管理', '/agents'),
+  agent.value?.name || '加载中...',
+])
 
 const statusBadgeClass = (status) => {
   return {

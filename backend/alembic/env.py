@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.db.base_class import Base
 from app.models.tool import Tool  # noqa: F401
 from app.models.user import User, Provider, UserProvider  # noqa: F401
+from app.models.mcp_config import McpServerConfig  # noqa: F401
 
 # this is the Alembic Config object
 config = context.config

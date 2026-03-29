@@ -53,6 +53,7 @@ def db_engine():
         poolclass=StaticPool,
     )
     from app.db.base_class import Base
+    from app.models.mcp_config import McpServerConfig  # noqa: F401 — registers models
     from app.models.tool import Tool  # noqa: F401 — registers models
     from app.models.user import Provider, User, UserProvider  # noqa: F401 — registers models
 

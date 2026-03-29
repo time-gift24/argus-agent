@@ -1,5 +1,9 @@
-## ADDED Requirements
+# user-provider-binding Specification
 
+## Purpose
+定义 User 与 user Provider 之间的绑定及默认策略。
+
+## Requirements
 ### Requirement: UserProvider junction links user to kind=user provider
 
 The system SHALL create a UserProvider record when a user creates their first user provider.

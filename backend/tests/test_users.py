@@ -13,6 +13,19 @@ def _dev_login(client: TestClient, name: str = "alice") -> str:
 
 
 class TestUserProfilePatch:
+    def test_get_me_includes_admin_flag(self, client: TestClient):
+        token = _dev_login(client, "alice")
+
+        resp = client.get(
+            "/api/v1/me",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["name"] == "alice"
+        assert body["is_admin"] is False
+
     def test_patch_me_ignores_unrelated_fields(self, client: TestClient):
         token = _dev_login(client, "alice")
 

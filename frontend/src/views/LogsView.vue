@@ -1,16 +1,27 @@
 <template>
-  <div class="max-w-7xl mx-auto space-y-5">
-    <div class="animate-fade-up">
-      <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">
-        系统 <span class="text-primary">日志</span>
-      </h1>
-      <p class="text-sm text-on-surface-variant mt-1">平台运行日志和事件记录。</p>
-    </div>
+  <PageBodyShell
+    :breadcrumbs="['系统日志']"
+    content-class="space-y-5"
+    description="平台运行日志和事件记录。"
+    title="系统日志"
+  >
+    <template #actions>
+      <tiny-button plain>
+        <span class="flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="7 10 12 15 17 10"/>
+            <line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+          导出
+        </span>
+      </tiny-button>
+    </template>
 
     <!-- Logs Panel -->
     <div class="bg-surface-container-lowest rounded-[2rem] border border-outline-variant/30 shadow-sm overflow-hidden animate-fade-up animate-delay-1">
       <!-- Toolbar -->
-      <div class="p-5 border-b border-outline-variant/20 flex items-center justify-between">
+      <div class="p-5 border-b border-outline-variant/20">
         <div class="flex items-center gap-3">
           <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">级别:</span>
           <div class="flex gap-1">
@@ -27,16 +38,6 @@
             </button>
           </div>
         </div>
-        <tiny-button plain>
-          <span class="flex items-center gap-1.5">
-            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-              <polyline points="7 10 12 15 17 10"/>
-              <line x1="12" y1="15" x2="12" y2="3"/>
-            </svg>
-            导出
-          </span>
-        </tiny-button>
       </div>
 
       <!-- Log Entries -->
@@ -48,12 +49,13 @@
         </div>
       </div>
     </div>
-  </div>
+  </PageBodyShell>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { Button as TinyButton } from '@opentiny/vue'
+import PageBodyShell from '../components/PageBodyShell.vue'
 
 const levels = ['全部', '信息', '警告', '异常']
 const activeLevel = ref('全部')

@@ -175,7 +175,7 @@
       </nav>
 
       <!-- Main Content -->
-      <main class="flex-1 px-8 pt-8 pb-12">
+      <main class="main-content flex-1 min-w-0 px-8 pt-6 pb-12">
         <router-view v-slot="{ Component }">
           <Transition name="fade" mode="out-in">
             <component :is="Component" />
@@ -262,6 +262,7 @@ const isActiveRoute = (path) => {
 const navLinks = [
   { name: '仪表盘', path: '/dashboard' },
   { name: '提供商', path: '/providers' },
+  { name: 'MCP 服务', path: '/mcp' },
   { name: '智能体', path: '/agents' },
   { name: '工具库', path: '/tools' },
   { name: '分析', path: '/logs' },
@@ -353,6 +354,10 @@ onUnmounted(() => window.removeEventListener('auth:required', onAuthRequired))
 </script>
 
 <style scoped>
+.main-content {
+  position: relative;
+}
+
 .sidebar-transition {
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
               padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);

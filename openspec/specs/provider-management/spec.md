@@ -1,5 +1,9 @@
-## ADDED Requirements
+# provider-management Specification
 
+## Purpose
+定义用户与内部 Provider 的核心管理 API 行为。
+
+## Requirements
 ### Requirement: User can list all internal providers
 
 The system SHALL allow authenticated users to list all `kind=internal` providers via `GET /internal-providers`.

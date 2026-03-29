@@ -19,7 +19,8 @@ dependencies = [
     "itsdangerous>=2.2.0",
     "langchain-openai>=1.1.11,<1.1.12",
     "langchain-core>=1.2.22,<1.2.23",
-
+    "langchain-mcp-adapters>=0.1.0",
+    "mcp>=1.0.0",
 ]
 
 [tool.uv]

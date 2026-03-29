@@ -1,14 +1,9 @@
 <template>
-  <div class="max-w-7xl mx-auto">
-    <!-- Page Header -->
-    <div class="flex items-center justify-between mb-8 animate-fade-up">
-      <div>
-        <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">
-          工具 <span class="text-primary">库</span>
-        </h1>
-        <p class="text-sm text-on-surface-variant mt-1">智能体可用的模块化能力</p>
-      </div>
-    </div>
+  <PageBodyShell
+    :breadcrumbs="['工具库']"
+    description="智能体可用的模块化能力。"
+    title="工具库"
+  >
 
     <div
       v-if="!userStore.isLoggedIn"
@@ -96,7 +91,7 @@
         <tiny-button type="danger" :loading="deleteLoading" @click="handleDelete">删除</tiny-button>
       </template>
     </tiny-dialog-box>
-  </div>
+  </PageBodyShell>
 </template>
 
 <script setup>
@@ -104,6 +99,7 @@ import { computed, ref, watch } from 'vue'
 import { useUserStore } from '../stores/user'
 import { useToolsStore } from '../stores/tools'
 import { Button as TinyButton, DialogBox as TinyDialogBox } from '@opentiny/vue'
+import PageBodyShell from '../components/PageBodyShell.vue'
 
 const userStore = useUserStore()
 const toolsStore = useToolsStore()

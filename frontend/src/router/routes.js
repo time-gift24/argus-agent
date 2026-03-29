@@ -1,0 +1,36 @@
+export const routes = [
+  { path: '/', redirect: '/dashboard' },
+  { name: 'dashboard', path: '/dashboard', component: () => import('../views/DashboardView.vue') },
+  { name: 'agents', path: '/agents', component: () => import('../views/AgentListView.vue') },
+  { name: 'agent-details', path: '/agents/:id', component: () => import('../views/AgentDetailsView.vue') },
+  { name: 'tools', path: '/tools', component: () => import('../views/ToolsView.vue') },
+  { name: 'shell', path: '/shell', component: () => import('../views/ShellView.vue') },
+  { name: 'logs', path: '/logs', component: () => import('../views/LogsView.vue') },
+  { name: 'mcp-configs', path: '/mcp', component: () => import('../views/McpConfigsView.vue') },
+  {
+    name: 'mcp-config-create',
+    path: '/mcp/new',
+    component: () => import('../views/McpConfigEditView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    name: 'mcp-config-edit',
+    path: '/mcp/:id/edit',
+    component: () => import('../views/McpConfigEditView.vue'),
+    meta: { requiresAuth: true },
+  },
+  { name: 'providers', path: '/providers', component: () => import('../views/ProvidersView.vue') },
+  {
+    name: 'provider-create',
+    path: '/providers/new',
+    component: () => import('../views/ProviderEditView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    name: 'provider-edit',
+    path: '/providers/:id/edit',
+    component: () => import('../views/ProviderEditView.vue'),
+    meta: { requiresAuth: true },
+  },
+  { name: 'settings', path: '/settings', component: () => import('../views/SettingsView.vue') },
+]

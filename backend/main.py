@@ -13,6 +13,7 @@ from app.services.tool_manager import seed_builtin_tools
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     """Seed internal providers and builtin tools on startup."""
+    _app.state.tools_cache = {}
     db = next(get_db())
     try:
         seed_internal_providers(db)

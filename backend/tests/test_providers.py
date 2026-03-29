@@ -185,6 +185,93 @@ class TestProviderCRUD:
         assert resp.status_code == 201
         assert "config" not in resp.json()
 
+    def test_get_provider_returns_decrypted_config_for_owner(self, client: TestClient):
+        token = _dev_login(client)
+        create_resp = client.post(
+            "/api/v1/providers",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "name": "OwnedProvider",
+                "config": {
+                    "api_key": "sk-owned",
+                    "base_url": "https://api.example.com",
+                    "model": "gpt-test",
+                },
+            },
+        )
+        provider_id = create_resp.json()["id"]
+
+        get_resp = client.get(
+            f"/api/v1/providers/{provider_id}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+
+        assert get_resp.status_code == 200
+        body = get_resp.json()
+        assert body["id"] == provider_id
+        assert body["name"] == "OwnedProvider"
+        assert body["kind"] == "user"
+        assert body["config"] == {
+            "api_key": "sk-owned",
+            "base_url": "https://api.example.com",
+            "model": "gpt-test",
+        }
+
+    def test_get_another_users_provider_returns_404(self, client: TestClient):
+        alice_token = _dev_login(client, "alice")
+        create_resp = client.post(
+            "/api/v1/providers",
+            headers={"Authorization": f"Bearer {alice_token}"},
+            json={"name": "AliceOnlyProvider", "config": {"api_key": "sk-alice-only"}},
+        )
+        provider_id = create_resp.json()["id"]
+
+        bob_token = _dev_login(client, "bob")
+        get_resp = client.get(
+            f"/api/v1/providers/{provider_id}",
+            headers={"Authorization": f"Bearer {bob_token}"},
+        )
+
+        assert get_resp.status_code == 404
+        assert get_resp.json()["detail"] == "Provider not found"
+
+    def test_update_provider_persists_new_name_and_config(self, client: TestClient):
+        token = _dev_login(client)
+        create_resp = client.post(
+            "/api/v1/providers",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"name": "BeforeUpdate", "config": {"api_key": "sk-before"}},
+        )
+        provider_id = create_resp.json()["id"]
+
+        update_resp = client.patch(
+            f"/api/v1/providers/{provider_id}",
+            headers={"Authorization": f"Bearer {token}"},
+            json={
+                "name": "AfterUpdate",
+                "config": {
+                    "api_key": "sk-after",
+                    "base_url": "https://proxy.example.com/v1",
+                    "model": "claude-test",
+                },
+            },
+        )
+
+        assert update_resp.status_code == 200
+        assert update_resp.json()["name"] == "AfterUpdate"
+        assert "config" not in update_resp.json()
+
+        get_resp = client.get(
+            f"/api/v1/providers/{provider_id}",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert get_resp.status_code == 200
+        assert get_resp.json()["config"] == {
+            "api_key": "sk-after",
+            "base_url": "https://proxy.example.com/v1",
+            "model": "claude-test",
+        }
+
     def test_create_provider_with_token_for_missing_user_returns_401(self, client: TestClient):
         token = create_token(user_id=str(uuid.uuid4()), name="ghost")
 

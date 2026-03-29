@@ -1,13 +1,10 @@
 <template>
-  <div class="max-w-7xl mx-auto">
-    <!-- Page Header -->
-    <div class="flex items-center justify-between mb-8 animate-fade-up">
-      <div>
-        <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">
-          LLM <span class="text-primary">提供商</span>
-        </h1>
-        <p class="text-sm text-on-surface-variant mt-1">管理大语言模型供应商及其配置</p>
-      </div>
+  <PageBodyShell
+    :breadcrumbs="['LLM 提供商']"
+    description="管理大语言模型供应商及其配置"
+    title="LLM 提供商"
+  >
+    <template #actions>
       <router-link
         v-if="userStore.isLoggedIn"
         to="/providers/new"
@@ -19,7 +16,7 @@
         </svg>
         新增提供商
       </router-link>
-    </div>
+    </template>
 
     <!-- Not logged in -->
     <div v-if="!userStore.isLoggedIn" class="text-center py-20 animate-fade-up">
@@ -162,7 +159,7 @@
         <tiny-button type="danger" :loading="deleteLoading" @click="handleDelete">删除</tiny-button>
       </template>
     </tiny-dialog-box>
-  </div>
+  </PageBodyShell>
 </template>
 
 <script setup>
@@ -170,6 +167,7 @@ import { ref, reactive, watch } from 'vue'
 import { useUserStore } from '../stores/user'
 import { useProvidersStore } from '../stores/providers'
 import { Button as TinyButton, DialogBox as TinyDialogBox } from '@opentiny/vue'
+import PageBodyShell from '../components/PageBodyShell.vue'
 import client, { getApiErrorMessage } from '../api/client'
 
 const userStore = useUserStore()

@@ -1,5 +1,9 @@
-## ADDED Requirements
+# user-auth Specification
 
+## Purpose
+定义 OIDC 与开发模式下的认证流程。
+
+## Requirements
 ### Requirement: OIDC login redirects to provider
 
 The system SHALL redirect unauthenticated users to the configured OIDC Provider's authorization endpoint when they access `GET /auth/login`.

@@ -77,6 +77,28 @@
 
 所有页面：`max-w-7xl mx-auto`
 
+### Body Page Template
+
+- body 页面顶部使用统一公共模板，面包屑始终位于内容区左上角固定位置
+- 面包屑容器固定使用 `max-w-7xl mx-auto`，不跟随具体页面内容宽度变化
+- 共享 header 保持轻量：不做 sticky、不做悬浮卡片、不额外包毛玻璃面板
+- 页面级操作按钮放在面包屑下方的独立一行，不得挤占或改变面包屑位置
+- 如页面已有面包屑，不再在 body 内重复渲染大标题；需要语义标题时使用页面模板统一提供
+
+### Dialog Usage
+
+- 优先使用页面内布局和内联反馈，尽可能减少业务弹窗
+- 弹窗主要用于防呆场景：删除确认、危险操作确认、登录补救
+- 新建/编辑流程默认使用独立页面，不使用大表单弹窗
+
+### Form Density
+
+- 表单以紧凑优先，控制在 `space-y-4` 到 `space-y-5`
+- 分组卡片只保留 micro label，不再重复渲染粗大标题
+- 新建页标题已经表达上下文时，表单 section 不再重复写“新增 XXX”
+- 分组卡片推荐：`rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-5 shadow-sm`
+- 提交区与测试结果保持内联，优先在当前页面就地反馈
+
 ### 间距规范
 
 | 场景 | 值 |
@@ -136,14 +158,18 @@ bg-surface-container-lowest rounded-[2rem] p-6 shadow-sm border border-outline-v
   [+ hover:shadow-xl transition-all duration-300 group]
 ```
 
-### Page Header
+### Body Page Header
 
 ```html
-<div class="animate-fade-up">
-  <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">
-    Title <span class="text-primary">Emphasis</span>
-  </h1>
-  <p class="text-sm text-on-surface-variant mt-1">Subtitle</p>
+<div class="mx-auto max-w-7xl animate-fade-up">
+  <div class="min-h-5 flex items-center">
+    <nav class="flex items-center gap-2 text-xs font-semibold text-on-surface-variant">
+      ...
+    </nav>
+  </div>
+  <div class="mt-3 flex items-center gap-2">
+    ...
+  </div>
 </div>
 ```
 

@@ -55,6 +55,12 @@ class ProviderRead(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ProviderDetailRead(ProviderRead):
+    """Response schema for a provider including decrypted config."""
+
+    config: ProviderConfigInput
+
+
 class UserProviderRead(BaseModel):
     """Response schema for a user-provider association."""
 
@@ -69,6 +75,13 @@ class UserProviderRead(BaseModel):
 
 class ProviderCreate(BaseModel):
     """Request schema for creating a user provider."""
+
+    name: str = Field(..., min_length=1, max_length=128)
+    config: ProviderConfigInput
+
+
+class ProviderUpdate(BaseModel):
+    """Request schema for updating a user provider."""
 
     name: str = Field(..., min_length=1, max_length=128)
     config: ProviderConfigInput

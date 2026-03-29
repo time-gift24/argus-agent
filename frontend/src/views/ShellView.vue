@@ -1,13 +1,10 @@
 <template>
-  <div class="max-w-7xl mx-auto h-full flex flex-col space-y-4">
-    <!-- Page Header -->
-    <div class="flex items-center justify-between shrink-0 animate-fade-up">
-      <div>
-        <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">
-          交互式 <span class="text-primary">控制台</span>
-        </h1>
-        <p class="text-sm text-on-surface-variant mt-1">直接与智能体交互的命令行界面</p>
-      </div>
+  <PageBodyShell
+    :breadcrumbs="['交互式控制台']"
+    description="直接与智能体交互的命令行界面。"
+    title="交互式控制台"
+  >
+    <template #actions>
       <div class="flex items-center gap-2">
         <tiny-button plain @click="clearHistory">
           <span class="flex items-center gap-1.5">
@@ -29,10 +26,10 @@
           </span>
         </tiny-button>
       </div>
-    </div>
+    </template>
 
     <!-- Terminal Window -->
-    <div class="flex-1 bg-inverse-surface rounded-[2rem] border border-outline-variant/30 shadow-lg flex flex-col overflow-hidden font-mono text-sm min-h-0 animate-fade-up animate-delay-1">
+    <div class="min-h-[70vh] bg-inverse-surface rounded-[2rem] border border-outline-variant/30 shadow-lg flex flex-col overflow-hidden font-mono text-sm animate-fade-up animate-delay-1">
 
       <!-- Title Bar -->
       <div class="bg-inverse-surface/80 px-5 py-3 border-b border-outline-variant/20 flex items-center justify-between shrink-0">
@@ -115,12 +112,13 @@
         </div>
       </div>
     </div>
-  </div>
+  </PageBodyShell>
 </template>
 
 <script setup>
 import { ref, nextTick } from 'vue'
 import { Button as TinyButton } from '@opentiny/vue'
+import PageBodyShell from '../components/PageBodyShell.vue'
 
 const input = ref('')
 const terminalBody = ref(null)

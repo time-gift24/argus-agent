@@ -1,12 +1,12 @@
 <!-- @mock — agent 列表数据来自 stores/agents.js 的硬编码数组；替换为：GET /api/agents -->
 <template>
-  <div class="max-w-7xl mx-auto space-y-5">
-    <!-- Page Header -->
-    <div class="flex items-center justify-between animate-fade-up">
-      <div>
-        <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">智能体 <span class="text-primary">管理</span></h1>
-        <p class="text-sm text-on-surface-variant mt-1">监控和管理所有已注册的智能体</p>
-      </div>
+  <PageBodyShell
+    :breadcrumbs="['智能体管理']"
+    content-class="space-y-5"
+    description="监控和管理所有已注册的智能体"
+    title="智能体管理"
+  >
+    <template #actions>
       <div class="flex items-center gap-2">
         <tiny-button type="primary">
           <span class="flex items-center gap-1.5">
@@ -26,7 +26,7 @@
           </span>
         </tiny-button>
       </div>
-    </div>
+    </template>
 
     <!-- Filters -->
     <div class="bg-surface-container-lowest p-4 rounded-[2rem] border border-outline-variant/30 shadow-sm flex items-center justify-between gap-4 flex-wrap animate-fade-up animate-delay-1">
@@ -155,12 +155,13 @@
         </tiny-grid-column>
       </tiny-grid>
     </div>
-  </div>
+  </PageBodyShell>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
 import { Grid as TinyGrid, GridColumn as TinyGridColumn, Button as TinyButton } from '@opentiny/vue'
+import PageBodyShell from '../components/PageBodyShell.vue'
 import { useAgentStore } from '../stores/agents'
 import { storeToRefs } from 'pinia'
 

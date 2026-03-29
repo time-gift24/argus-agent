@@ -8,20 +8,53 @@ from sqlalchemy.orm import Session
 
 from app.auth.deps import get_current_user_id
 from app.core.config import settings
-from app.core.crypto import encrypt
+from app.core.crypto import decrypt, encrypt
 from app.db.session import get_db
 from app.models.user import Provider, ProviderKind, UserProvider
 from app.schemas.user import (
     DefaultUpdate,
     ProviderConfigInput,
     ProviderCreate,
+    ProviderDetailRead,
     ProviderRead,
     ProviderTestResult,
+    ProviderUpdate,
     UserProviderRead,
 )
 from app.services.provider_test import test_config_connectivity, test_provider_connectivity
 
 router = APIRouter(tags=["providers"])
+
+
+def _get_user_provider_association(db: Session, user_id: str, provider_id: str) -> UserProvider:
+    assoc = (
+        db.query(UserProvider)
+        .filter(UserProvider.user_id == user_id, UserProvider.provider_id == provider_id)
+        .first()
+    )
+    if not assoc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Provider not found")
+    return assoc
+
+
+def _build_provider_detail(provider: Provider) -> ProviderDetailRead:
+    try:
+        config_json = decrypt(provider.config, settings.aes_key_bytes)
+        config = ProviderConfigInput.model_validate(json.loads(config_json))
+    except Exception as exc:  # pragma: no cover - defensive guard for corrupted data
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Provider config is corrupted",
+        ) from exc
+
+    return ProviderDetailRead(
+        id=provider.id,
+        name=provider.name,
+        kind=provider.kind.value,
+        created_at=provider.created_at,
+        updated_at=provider.updated_at,
+        config=config,
+    )
 
 
 # ── Test config (no provider needed) ──────────────────────────────────────────
@@ -122,6 +155,40 @@ def create_user_provider(
     db.commit()
     db.refresh(provider)
 
+    return ProviderRead.model_validate(provider)
+
+
+@router.get("/providers/{provider_id}", response_model=ProviderDetailRead, name="get_user_provider")
+def get_user_provider(
+    provider_id: str,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> ProviderDetailRead:
+    """Return a user provider with decrypted config for editing."""
+    assoc = _get_user_provider_association(db, user_id, provider_id)
+    return _build_provider_detail(assoc.provider)
+
+
+@router.patch("/providers/{provider_id}", response_model=ProviderRead, name="update_user_provider")
+def update_user_provider(
+    provider_id: str,
+    data: ProviderUpdate,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> ProviderRead:
+    """Update a user provider and replace its encrypted config."""
+    assoc = _get_user_provider_association(db, user_id, provider_id)
+    provider = assoc.provider
+    if provider.kind == ProviderKind.INTERNAL:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot update internal provider")
+
+    provider.name = data.name
+    config_json = json.dumps(data.config.model_dump(), separators=(",", ":"))
+    provider.config = encrypt(config_json, settings.aes_key_bytes)
+
+    db.add(provider)
+    db.commit()
+    db.refresh(provider)
     return ProviderRead.model_validate(provider)
 
 

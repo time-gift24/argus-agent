@@ -1,11 +1,10 @@
 <template>
-  <div class="max-w-7xl mx-auto space-y-5">
-    <div class="animate-fade-up">
-      <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">
-        系统<span class="text-primary">设置</span>
-      </h1>
-      <p class="text-sm text-on-surface-variant mt-1">配置平台参数和访问策略。</p>
-    </div>
+  <PageBodyShell
+    :breadcrumbs="['系统设置']"
+    content-class="space-y-5"
+    description="配置平台参数和访问策略。"
+    title="系统设置"
+  >
 
     <div class="space-y-6">
       <!-- 通用配置 -->
@@ -36,11 +35,12 @@
         </div>
       </div>
     </div>
-  </div>
+  </PageBodyShell>
 </template>
 
 <script setup>
 import { Button as TinyButton } from '@opentiny/vue'
+import PageBodyShell from '../components/PageBodyShell.vue'
 
 const generalSettings = [
   { name: '最大并发智能体', desc: '可同时运行的最大智能体数量。' },

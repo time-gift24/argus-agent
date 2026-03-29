@@ -1,16 +1,9 @@
 <template>
-  <div class="max-w-7xl mx-auto">
-    <!-- Hero Header -->
-    <header class="mb-12 max-w-5xl animate-fade-up">
-      <h1 class="font-headline text-5xl font-bold tracking-tight text-on-surface mb-4">
-        智能体 <span class="text-primary">总览</span>
-      </h1>
-      <p class="text-on-surface-variant text-lg max-w-2xl leading-relaxed">
-        监控分布式智能体架构中的高频决策循环，当前追踪 {{ agentStore.agents.length }} 个并发流。
-      </p>
-    </header>
-
-    <!-- Bento Grid -->
+  <PageBodyShell
+    :breadcrumbs="['仪表盘']"
+    :description="`监控分布式智能体架构中的高频决策循环，当前追踪 ${agentStore.agents.length} 个并发流。`"
+    title="智能体总览"
+  >
     <div class="grid grid-cols-12 gap-6">
 
       <!-- Hero Process Map -->
@@ -298,11 +291,12 @@
       </div>
 
     </div>
-  </div>
+  </PageBodyShell>
 </template>
 
 <script setup>
 import { Grid as TinyGrid, GridColumn as TinyGridColumn, Button as TinyButton } from '@opentiny/vue'
+import PageBodyShell from '../components/PageBodyShell.vue'
 import { useAgentStore } from '../stores/agents'
 
 const agentStore = useAgentStore()

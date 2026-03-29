@@ -114,7 +114,7 @@ function handleRemoveModelDraft(name) {
         当前测试会使用模型：<span class="font-mono">{{ form.test_model.trim() }}</span>
       </p>
       <p v-else class="mt-3 text-xs text-on-surface-variant">
-        留空时只验证 API Key / Base URL 是否可达，不校验具体模型代码。
+        留空时部分 SDK 仍可能回退到默认模型；如果返回“模型不存在”，请填写供应商实际模型代码。
       </p>
     </section>
 

@@ -52,6 +52,28 @@ def list_mcp_configs(
 
 
 @router.post(
+    "/mcp-configs/test-config",
+    response_model=TestResult,
+    name="test_mcp_config_input",
+)
+async def test_mcp_config_input(
+    data: McpConfigCreate,
+    user: dict = Depends(get_current_user_with_admin),
+) -> TestResult:
+    """Test raw MCP config input without persisting it."""
+    tools = await mcp_config_service.test_config_connectivity(
+        data,
+        user["id"],
+        user["is_admin"],
+    )
+    return TestResult(
+        success=True,
+        message=f"Connected successfully, found {len(tools)} tools",
+        tools=[ToolInfo(**t) for t in tools],
+    )
+
+
+@router.post(
     "/mcp-configs",
     response_model=McpConfigRead,
     status_code=status.HTTP_201_CREATED,

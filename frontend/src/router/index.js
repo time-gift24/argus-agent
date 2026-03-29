@@ -16,6 +16,7 @@ const routes = [
   { path: '/tools', component: ToolsView },
   { path: '/shell', component: ShellView },
   { path: '/logs', component: LogsView },
+  { path: '/mcp', component: () => import('../views/McpConfigsView.vue') },
   { path: '/providers', component: () => import('../views/ProvidersView.vue') },
   { path: '/providers/new', component: () => import('../views/ProviderEditView.vue'), meta: { requiresAuth: true } },
   { path: '/providers/:id/edit', component: () => import('../views/ProviderEditView.vue'), meta: { requiresAuth: true } },

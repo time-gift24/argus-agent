@@ -8,6 +8,7 @@ export const useUserStore = defineStore('user', () => {
   const profile = ref(JSON.parse(localStorage.getItem('user_profile') || 'null'))
 
   const isLoggedIn = computed(() => !!token.value)
+  const isAdmin = computed(() => Boolean(profile.value?.is_admin))
   const userName = computed(() => profile.value?.name || '')
   const userId = computed(() => profile.value?.id || '')
 
@@ -37,5 +38,5 @@ export const useUserStore = defineStore('user', () => {
     localStorage.removeItem('user_profile')
   }
 
-  return { token, profile, isLoggedIn, userName, userId, login, fetchProfile, logout }
+  return { token, profile, isLoggedIn, isAdmin, userName, userId, login, fetchProfile, logout }
 })

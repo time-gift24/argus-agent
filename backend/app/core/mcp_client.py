@@ -19,6 +19,40 @@ logger = logging.getLogger(__name__)
 CONNECTION_TIMEOUT = 30  # seconds
 
 
+def serialize_tool_input_schema(tool: Any) -> dict[str, Any] | None:
+    """Return a JSON-schema-like dict for the tool input schema."""
+    args_schema = getattr(tool, "args_schema", None)
+    if not args_schema:
+        return None
+    if isinstance(args_schema, dict):
+        return args_schema
+
+    model_json_schema = getattr(args_schema, "model_json_schema", None)
+    if callable(model_json_schema):
+        return model_json_schema()
+
+    schema = getattr(args_schema, "schema", None)
+    if callable(schema):
+        return schema()
+
+    return None
+
+
+def unwrap_exception_message(exc: BaseException) -> str:
+    """Flatten nested ExceptionGroup messages to the most useful leaf error."""
+    children = getattr(exc, "exceptions", None)
+    if children:
+        leaf_messages: list[str] = []
+        for child in children:
+            message = unwrap_exception_message(child)
+            if message and message not in leaf_messages:
+                leaf_messages.append(message)
+        if leaf_messages:
+            return "; ".join(leaf_messages)
+
+    return str(exc) or exc.__class__.__name__
+
+
 def build_client_config(config: McpServerConfig) -> dict[str, Any]:
     """Convert ORM model to MultiServerMCPClient config dict.
 
@@ -62,7 +96,7 @@ async def test_connection(
                     {
                         "name": tool.name,
                         "description": tool.description,
-                        "inputSchema": tool.args_schema.schema() if hasattr(tool, "args_schema") and tool.args_schema else None,
+                        "inputSchema": serialize_tool_input_schema(tool),
                     }
                     for tool in tools
                 ]

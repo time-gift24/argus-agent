@@ -262,6 +262,7 @@ const isActiveRoute = (path) => {
 const navLinks = [
   { name: '仪表盘', path: '/dashboard' },
   { name: '提供商', path: '/providers' },
+  { name: 'MCP 服务', path: '/mcp' },
   { name: '智能体', path: '/agents' },
   { name: '工具库', path: '/tools' },
   { name: '分析', path: '/logs' },

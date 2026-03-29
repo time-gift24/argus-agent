@@ -8,7 +8,11 @@ from typing import Any
 from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.mcp_client import build_client_config, encrypt_sensitive_fields, test_connection
+from app.core.mcp_client import (
+    encrypt_sensitive_fields,
+    test_connection,
+    unwrap_exception_message,
+)
 from app.models.mcp_config import McpConfigKind, McpServerConfig, McpTransport
 from app.models.user import User
 from app.schemas.mcp_config import McpConfigCreate, McpConfigUpdate
@@ -46,14 +50,25 @@ def create_config(
     is_admin: bool,
 ) -> McpServerConfig:
     """Create a new MCP server config."""
-    # stdio restriction: admin only
+    config = McpServerConfig(**build_config_model_data(data, user_id, is_admin))
+    db.add(config)
+    db.commit()
+    db.refresh(config)
+    return config
+
+
+def build_config_model_data(
+    data: McpConfigCreate,
+    user_id: str,
+    is_admin: bool,
+) -> dict[str, Any]:
+    """Build encrypted model data from API input."""
     if data.transport == "stdio" and not is_admin:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only admins can create stdio MCP configs",
         )
 
-    # Build model data
     model_data: dict[str, Any] = {
         "name": data.name,
         "description": data.description,
@@ -78,11 +93,7 @@ def create_config(
                 {"headers": data.headers}, ["headers"]
             )["headers"]
 
-    config = McpServerConfig(**model_data)
-    db.add(config)
-    db.commit()
-    db.refresh(config)
-    return config
+    return model_data
 
 
 def update_config(
@@ -186,7 +197,29 @@ async def test_reachability(
         tools_cache.pop(config_id, None)
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
-            detail=f"Failed to connect to MCP server: {e}",
+            detail=f"Failed to connect to MCP server: {unwrap_exception_message(e)}",
+        )
+
+
+async def test_config_connectivity(
+    data: McpConfigCreate,
+    user_id: str,
+    is_admin: bool,
+) -> list[dict[str, Any]]:
+    """Test connectivity for an unsaved MCP config."""
+    config = McpServerConfig(**build_config_model_data(data, user_id, is_admin))
+
+    try:
+        return await test_connection(config)
+    except TimeoutError:
+        raise HTTPException(
+            status_code=status.HTTP_408_REQUEST_TIMEOUT,
+            detail=f"Connection to MCP server timed out ({config.name})",
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"Failed to connect to MCP server: {unwrap_exception_message(e)}",
         )
 
 

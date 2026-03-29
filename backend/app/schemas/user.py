@@ -13,6 +13,7 @@ class UserRead(BaseModel):
 
     id: str
     name: str
+    is_admin: bool
     oauth_provider: str
     meta_data: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime

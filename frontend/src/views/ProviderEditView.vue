@@ -15,6 +15,11 @@
       @submit="handleSubmit"
       @test="handleTestConfig"
     />
+
+    <ProviderModelList
+      v-if="isEdit && providerId"
+      :provider-id="providerId"
+    />
   </PageBodyShell>
 </template>
 
@@ -25,6 +30,8 @@ import * as api from '../api/providers'
 import client, { getApiErrorMessage } from '../api/client'
 import PageBodyShell from '../components/PageBodyShell.vue'
 import ProviderConfigForm from '../components/ProviderConfigForm.vue'
+import ProviderModelList from '../components/ProviderModelList.vue'
+import { buildProviderPayload } from '../utils/providerModelDrafts'
 import { breadcrumb } from '../utils/pageShell'
 
 const route = useRoute()
@@ -36,13 +43,13 @@ const form = ref({
   name: '',
   api_key: '',
   base_url: '',
-  model: '',
+  models: [],
 })
 const pageTitle = computed(() => (isEdit.value ? '编辑提供商' : '新增提供商'))
 const pageDescription = computed(() => (
   isEdit.value
     ? '调整当前 Provider 的名称、凭据和连接参数，并在保存前完成连接验证。'
-    : '创建新的 LLM Provider，并在保存前验证连接是否可用。'
+    : '创建新的 LLM Provider，并可同时添加初始模型。'
 ))
 const breadcrumbs = computed(() => [
   breadcrumb('LLM 提供商', '/providers'),
@@ -54,7 +61,7 @@ const error = ref('')
 
 // Test config
 const testLoading = ref(false)
-const testResult = ref(null) // { success, message, latency_ms }
+const testResult = ref(null)
 
 async function handleTestConfig() {
   if (!form.value.api_key.trim()) {
@@ -67,7 +74,7 @@ async function handleTestConfig() {
     const { data } = await client.post('/providers/test-config', {
       api_key: form.value.api_key.trim(),
       base_url: form.value.base_url.trim() || null,
-      model: form.value.model.trim() || null,
+      model: null,
     })
     testResult.value = data
   } catch (e) {
@@ -85,7 +92,7 @@ onMounted(async () => {
         name: data.name || '',
         api_key: data.config?.api_key || '',
         base_url: data.config?.base_url || '',
-        model: data.config?.model || '',
+        models: [],
       }
     } catch (e) {
       error.value = '加载提供商信息失败'
@@ -102,14 +109,7 @@ async function handleSubmit() {
   loading.value = true
   error.value = ''
 
-  const payload = {
-    name: form.value.name.trim(),
-    config: {
-      api_key: form.value.api_key.trim(),
-      base_url: form.value.base_url.trim() || null,
-      model: form.value.model.trim() || null,
-    }
-  }
+  const payload = buildProviderPayload(form.value, { includeModels: !providerId.value })
 
   try {
     if (providerId.value) {

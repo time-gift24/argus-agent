@@ -5,7 +5,16 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+
+def _normalize_model_name(value: str) -> str:
+    name = value.strip()
+    if not name:
+        raise ValueError("Model name cannot be empty")
+    if len(name) > 128:
+        raise ValueError("Model name must be 128 characters or fewer")
+    return name
 
 
 class UserRead(BaseModel):
@@ -40,7 +49,6 @@ class ProviderConfigInput(BaseModel):
 
     api_key: str = Field(..., min_length=1)
     base_url: str | None = None
-    model: str | None = None
 
 
 class ProviderRead(BaseModel):
@@ -78,6 +86,20 @@ class ProviderCreate(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=128)
     config: ProviderConfigInput
+    models: list[str] = Field(default_factory=list)
+
+    @field_validator("models")
+    @classmethod
+    def validate_models(cls, values: list[str]) -> list[str]:
+        normalized: list[str] = []
+        seen: set[str] = set()
+        for value in values:
+            name = _normalize_model_name(value)
+            if name in seen:
+                raise ValueError(f"Duplicate model name: {name}")
+            seen.add(name)
+            normalized.append(name)
+        return normalized
 
 
 class ProviderUpdate(BaseModel):
@@ -85,6 +107,37 @@ class ProviderUpdate(BaseModel):
 
     name: str = Field(..., min_length=1, max_length=128)
     config: ProviderConfigInput
+
+
+class ProviderModelCreate(BaseModel):
+    """Request schema for adding a model to a provider."""
+
+    name: str = Field(..., min_length=1, max_length=128)
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value: str) -> str:
+        return _normalize_model_name(value)
+
+
+class ProviderModelRead(BaseModel):
+    """Response schema for a provider model."""
+
+    id: str
+    name: str
+    is_default: bool
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class TestConfigInput(BaseModel):
+    """Input schema for test-config endpoint (model at top level)."""
+
+    api_key: str = Field(..., min_length=1)
+    base_url: str | None = None
+    model: str | None = None
 
 
 class DefaultUpdate(BaseModel):

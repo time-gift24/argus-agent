@@ -13,5 +13,5 @@ def test_alembic_has_single_head():
     script = ScriptDirectory.from_config(config)
 
     assert script.get_heads() == [
-        "85222bba3a92",
+        "a1b2c3d4e5f6",
     ]

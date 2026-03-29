@@ -77,6 +77,35 @@ class Provider(Base):
     user_associations: Mapped[list["UserProvider"]] = relationship(
         back_populates="provider", cascade="all, delete-orphan"
     )
+    models: Mapped[list["ProviderModel"]] = relationship(
+        back_populates="provider", cascade="all, delete-orphan", order_by="ProviderModel.created_at"
+    )
+
+
+class ProviderModel(Base):
+    __tablename__ = "provider_models"
+
+    id: Mapped[str] = mapped_column(
+        String(36), primary_key=True, default=lambda: str(uuid.uuid4())
+    )
+    provider_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("providers.id", ondelete="CASCADE"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    is_default: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_utc_now
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=_utc_now, onupdate=_utc_now
+    )
+
+    __table_args__ = (
+        UniqueConstraint("provider_id", "name", name="uq_provider_model_name"),
+        Index("ix_provider_model_provider_id", "provider_id"),
+    )
+
+    provider: Mapped["Provider"] = relationship(back_populates="models")
 
 
 class UserProvider(Base):

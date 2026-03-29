@@ -179,6 +179,38 @@ paths:
 
   # ── Providers ────────────────────────────────────────────────────────────────
 
+  /providers/test-config:
+    post:
+      operationId: test_provider_config
+      summary: Test provider connectivity with raw config
+      description: |
+        Uses the submitted `api_key`, optional `base_url`, and optional top-level `model`
+        to perform a connectivity probe without creating a persisted provider.
+      tags: [providers]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TestConfigInput"
+            example:
+              api_key: sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+              base_url: https://api.openai.com/v1
+              model: gpt-4o
+      responses:
+        "200":
+          description: Connectivity test result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProviderTestResult"
+        "401":
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
   /internal-providers:
     get:
       operationId: list_internal_providers
@@ -248,7 +280,9 @@ paths:
               config:
                 api_key: sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
                 base_url: https://api.openai.com
-                model: gpt-4o-mini
+              models:
+                - gpt-4o
+                - gpt-4o-mini
       responses:
         "201":
           description: Provider created
@@ -362,6 +396,204 @@ paths:
                 $ref: "#/components/schemas/Error"
         "404":
           description: Provider not associated with user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /providers/{provider_id}/models:
+    get:
+      operationId: list_provider_models
+      summary: List all models under a provider
+      tags: [providers]
+      parameters:
+        - in: path
+          name: provider_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Provider model list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProviderModelRead"
+        "401":
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Provider not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      operationId: add_provider_model
+      summary: Add a model to a provider
+      description: |
+        Appends a model under the specified provider. If this is the first model for the
+        provider, it becomes the default automatically.
+      tags: [providers]
+      parameters:
+        - in: path
+          name: provider_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProviderModelCreate"
+            example:
+              name: gpt-4o-mini
+      responses:
+        "201":
+          description: Provider model created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProviderModelRead"
+        "401":
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Provider not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "409":
+          description: Duplicate model name
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /providers/{provider_id}/models/{model_id}:
+    delete:
+      operationId: delete_provider_model
+      summary: Delete a model from a provider
+      description: |
+        Deletes the target model. If the deleted model was the default and there are
+        remaining models, the most recently created remaining model becomes the new default.
+      tags: [providers]
+      parameters:
+        - in: path
+          name: provider_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: model_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Provider model deleted
+        "401":
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Provider or model not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /providers/{provider_id}/models/{model_id}/default:
+    put:
+      operationId: set_default_provider_model
+      summary: Set the default model for a provider
+      tags: [providers]
+      parameters:
+        - in: path
+          name: provider_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: model_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Provider model updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProviderModelRead"
+        "401":
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Provider or model not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /providers/{provider_id}/models/{model_id}/test:
+    post:
+      operationId: test_provider_model
+      summary: Test a specific provider model
+      description: |
+        Uses the provider's persisted `api_key` and `base_url` together with the selected
+        model name to perform a connectivity probe.
+      tags: [providers]
+      parameters:
+        - in: path
+          name: provider_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: path
+          name: model_id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Connectivity test result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProviderTestResult"
+        "401":
+          description: Missing or invalid JWT
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Provider or model not found
           content:
             application/json:
               schema:
@@ -489,6 +721,14 @@ components:
           example: My OpenAI
         config:
           $ref: "#/components/schemas/ProviderConfigInput"
+        models:
+          type: array
+          description: Optional initial model names to create with the provider
+          items:
+            type: string
+            minLength: 1
+            maxLength: 128
+          example: [gpt-4o, gpt-4o-mini]
 
     ProviderConfigInput:
       type: object
@@ -504,11 +744,72 @@ components:
           nullable: true
           description: Optional custom base URL
           example: https://api.openai.com
+
+    ProviderModelCreate:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Provider model name
+          example: gpt-4o
+
+    ProviderModelRead:
+      type: object
+      required: [id, name, is_default, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: gpt-4o
+        is_default:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    TestConfigInput:
+      type: object
+      required: [api_key]
+      properties:
+        api_key:
+          type: string
+          minLength: 1
+          description: API key for the LLM provider
+          example: sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        base_url:
+          type: string
+          nullable: true
+          description: Optional custom base URL
+          example: https://api.openai.com/v1
         model:
           type: string
           nullable: true
-          description: Optional default model name
-          example: gpt-4o-mini
+          description: Optional model name to test
+          example: gpt-4o
+
+    ProviderTestResult:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Connection successful
+        latency_ms:
+          type: integer
+          nullable: true
+          example: 235
 
     DefaultUpdate:
       type: object

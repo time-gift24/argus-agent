@@ -27,3 +27,25 @@ export function update(id, data) {
 export function setDefault(id) {
   return client.put(`/providers/${id}/default`)
 }
+
+// ── Provider Models ──────────────────────────────────────────────────────────
+
+export function listModels(providerId) {
+  return client.get(`/providers/${providerId}/models`)
+}
+
+export function addModel(providerId, name) {
+  return client.post(`/providers/${providerId}/models`, { name })
+}
+
+export function deleteModel(providerId, modelId) {
+  return client.delete(`/providers/${providerId}/models/${modelId}`)
+}
+
+export function setDefaultModel(providerId, modelId) {
+  return client.put(`/providers/${providerId}/models/${modelId}/default`)
+}
+
+export function testModel(providerId, modelId) {
+  return client.post(`/providers/${providerId}/models/${modelId}/test`)
+}

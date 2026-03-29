@@ -53,6 +53,7 @@ def db_engine():
         poolclass=StaticPool,
     )
     from app.db.base_class import Base
+    from app.models.tool import Tool  # noqa: F401 — registers models
     from app.models.user import Provider, User, UserProvider  # noqa: F401 — registers models
 
     Base.metadata.create_all(bind=engine)
@@ -76,13 +77,15 @@ def db_session(db_session_factory):
         session.close()
 
 
-@pytest.fixture(scope="function")
-def client(db_engine, db_session_factory):
-    """FastAPI TestClient with in-memory DB and dev mode."""
+def _build_client(db_engine, db_session_factory, *, raise_server_exceptions: bool):
+    """Create a FastAPI TestClient backed by the in-memory test database."""
     # Override get_db dependency to use test DB
     from app.db import session as session_module
+    import main as main_module
 
     original_get_db = session_module.get_db
+    original_session_local = session_module.SessionLocal
+    original_main_get_db = main_module.get_db
 
     def _test_db():
         session = db_session_factory()
@@ -92,9 +95,12 @@ def client(db_engine, db_session_factory):
             session.close()
 
     session_module.get_db = _test_db
+    session_module.SessionLocal = db_session_factory
+    main_module.get_db = _test_db
 
     # Clean state: delete in dependency order, using session to stay consistent
     with db_engine.begin() as conn:
+        conn.execute(text("DELETE FROM tools"))
         conn.execute(text("DELETE FROM user_providers"))
         conn.execute(text("DELETE FROM providers"))
         conn.execute(text("DELETE FROM users"))
@@ -106,9 +112,33 @@ def client(db_engine, db_session_factory):
     seed_internal_providers(session)
     session.close()
 
-    from main import app
-
-    with TestClient(app, base_url="http://test") as c:
+    with TestClient(
+        main_module.app,
+        base_url="http://test",
+        raise_server_exceptions=raise_server_exceptions,
+    ) as c:
         yield c
 
     session_module.get_db = original_get_db
+    session_module.SessionLocal = original_session_local
+    main_module.get_db = original_main_get_db
+
+
+@pytest.fixture(scope="function")
+def client(db_engine, db_session_factory):
+    """FastAPI TestClient with in-memory DB and dev mode."""
+    yield from _build_client(
+        db_engine,
+        db_session_factory,
+        raise_server_exceptions=True,
+    )
+
+
+@pytest.fixture(scope="function")
+def client_no_raise(db_engine, db_session_factory):
+    """FastAPI TestClient that returns 5xx responses instead of raising server exceptions."""
+    yield from _build_client(
+        db_engine,
+        db_session_factory,
+        raise_server_exceptions=False,
+    )

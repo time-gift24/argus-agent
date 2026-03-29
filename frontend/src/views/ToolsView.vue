@@ -1,112 +1,136 @@
-<!-- @mock — 6 张占位卡片，无真实工具数据；替换为：GET /api/tools -->
 <template>
-  <div class="max-w-7xl mx-auto space-y-6">
-    <div class="animate-fade-up">
-      <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface mb-1">
-        工具 <span class="text-primary">库</span>
-      </h1>
-      <p class="text-sm text-on-surface-variant">智能体可用的模块化能力。</p>
+  <div class="max-w-7xl mx-auto">
+    <!-- Page Header -->
+    <div class="flex items-center justify-between mb-8 animate-fade-up">
+      <div>
+        <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">
+          工具 <span class="text-primary">库</span>
+        </h1>
+        <p class="text-sm text-on-surface-variant mt-1">智能体可用的模块化能力</p>
+      </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-      <div
-        v-for="(tool, i) in tools"
-        :key="i"
-        class="bg-surface-container-lowest p-6 rounded-[2rem] shadow-sm border border-outline-variant/30 hover:shadow-xl transition-all duration-300 group cursor-pointer animate-fade-up"
-        :class="`animate-delay-${i + 1}`"
-      >
-        <div class="absolute top-6 right-6" v-if="tool.elite">
-          <span class="flex items-center gap-1 text-[10px] font-bold text-primary">
-            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 2L9 9l-7 1 5 5-1.5 7L12 18.5 18.5 22 17 15l5-5-7-1z"/>
-            </svg>
-            ELITE
-          </span>
-        </div>
+    <div
+      v-if="!userStore.isLoggedIn"
+      class="mb-8 rounded-[2rem] border border-outline-variant/30 bg-surface-container-low px-6 py-4 text-sm text-on-surface-variant animate-fade-up animate-delay-1"
+    >
+      当前可浏览全部工具，登录后可新增或删除自定义工具。
+    </div>
 
-        <div class="w-14 h-14 rounded-2xl flex items-center justify-center mb-5 transition-colors"
-          :class="tool.bgClass"
-        >
-          <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" :class="tool.iconClass" v-html="tool.iconPath"></svg>
-        </div>
-        <h3 class="font-headline font-bold text-lg text-on-surface mb-2">{{ tool.name }}</h3>
-        <p class="text-xs text-on-surface-variant leading-relaxed">{{ tool.desc }}</p>
+    <!-- Loading -->
+    <div v-if="toolsStore.loading" class="text-center py-12 text-on-surface-variant text-sm">加载中...</div>
 
-        <div class="mt-5 pt-4 border-t border-outline-variant/20 flex items-center justify-between">
-          <span class="text-[10px] font-bold uppercase tracking-widest" :class="tool.statusClass">{{ tool.status }}</span>
-          <div class="flex items-center gap-1 text-on-surface-variant group-hover:text-primary transition-colors">
-            <span class="text-[10px] font-bold">打开</span>
-            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/>
-            </svg>
+    <template v-else>
+      <div v-if="!hasTools" class="text-center py-12 text-on-surface-variant">
+        <p class="text-sm">暂无工具</p>
+      </div>
+
+      <!-- Builtin Tools -->
+      <div v-if="toolsStore.builtinTools.length" class="mb-8 animate-fade-up animate-delay-1">
+        <h2 class="text-sm font-bold tracking-widest uppercase text-on-surface-variant mb-4">内置工具</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div
+            v-for="tool in toolsStore.builtinTools"
+            :key="tool.id"
+            class="bg-surface-container-lowest rounded-[2rem] p-6 shadow-sm border border-outline-variant/30"
+          >
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-xl bg-primary-fixed flex items-center justify-center">
+                <svg class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-headline font-bold text-sm text-on-surface">{{ tool.name }}</h3>
+                <span class="text-[10px] font-bold tracking-widest uppercase text-primary">BUILTIN</span>
+              </div>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-relaxed">{{ tool.description }}</p>
           </div>
         </div>
       </div>
-    </div>
+
+      <!-- Custom Tools -->
+      <div v-if="userStore.isLoggedIn || toolsStore.customTools.length" class="animate-fade-up animate-delay-2">
+        <h2 class="text-sm font-bold tracking-widest uppercase text-on-surface-variant mb-4">自定义工具</h2>
+        <div v-if="toolsStore.customTools.length" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          <div
+            v-for="tool in toolsStore.customTools"
+            :key="tool.id"
+            class="bg-surface-container-lowest rounded-[2rem] p-6 shadow-sm border border-outline-variant/30 hover:shadow-xl transition-all duration-300 group"
+          >
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-10 h-10 rounded-xl bg-tertiary-fixed flex items-center justify-center">
+                <svg class="w-5 h-5 text-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                </svg>
+              </div>
+              <div>
+                <h3 class="font-headline font-bold text-sm text-on-surface">{{ tool.name }}</h3>
+                <span class="text-[10px] font-bold tracking-widest uppercase text-tertiary-fixed-dim">CUSTOM</span>
+              </div>
+            </div>
+            <p class="text-xs text-on-surface-variant leading-relaxed">{{ tool.description }}</p>
+            <div class="flex items-center gap-2 pt-3 mt-4 border-t border-outline-variant/10">
+              <button
+                v-if="userStore.isLoggedIn"
+                class="px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase text-on-surface-variant hover:text-danger rounded-lg hover:bg-surface-container transition-colors cursor-pointer ml-auto"
+                @click="confirmDelete(tool)"
+              >
+                删除
+              </button>
+            </div>
+          </div>
+        </div>
+        <div v-else class="text-center py-12 text-on-surface-variant">
+          <p class="text-sm">暂无自定义工具</p>
+        </div>
+      </div>
+    </template>
+
+    <!-- Delete Dialog -->
+    <tiny-dialog-box v-model:visible="showDeleteDialog" append-to-body title="确认删除" width="400px">
+      <p class="text-sm text-on-surface-variant">确定要删除工具「{{ deleteTarget?.name }}」吗？此操作不可撤销。</p>
+      <template #footer>
+        <tiny-button @click="showDeleteDialog = false">取消</tiny-button>
+        <tiny-button type="danger" :loading="deleteLoading" @click="handleDelete">删除</tiny-button>
+      </template>
+    </tiny-dialog-box>
   </div>
 </template>
 
 <script setup>
-const tools = [
-  {
-    name: '网页抓取器',
-    desc: '智能解析与限速的网页结构化数据提取。',
-    status: '运行中',
-    statusClass: 'text-success',
-    elite: true,
-    bgClass: 'bg-primary-fixed group-hover:bg-primary',
-    iconClass: 'text-primary group-hover:text-on-primary',
-    iconPath: '<circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
-  },
-  {
-    name: '代码执行器',
-    desc: '安全沙箱运行环境，执行智能体生成的代码。',
-    status: '运行中',
-    statusClass: 'text-success',
-    elite: false,
-    bgClass: 'bg-tertiary-fixed group-hover:bg-tertiary',
-    iconClass: 'text-tertiary group-hover:text-on-tertiary',
-    iconPath: '<polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>',
-  },
-  {
-    name: '情绪引擎',
-    desc: '基于 NLP 的市场情绪分析管线。',
-    status: '运行中',
-    statusClass: 'text-success',
-    elite: false,
-    bgClass: 'bg-secondary-fixed group-hover:bg-secondary',
-    iconClass: 'text-secondary group-hover:text-on-secondary',
-    iconPath: '<path d="M12 2a8 8 0 0 1 8 8v4a8 8 0 0 1-16 0v-4a8 8 0 0 1 8-8z"/><path d="M9 12h.01M15 12h.01"/>',
-  },
-  {
-    name: '数据管道',
-    desc: '编排智能体与外部服务之间的复杂数据流。',
-    status: 'Beta',
-    statusClass: 'text-primary',
-    elite: false,
-    bgClass: 'bg-primary-fixed group-hover:bg-primary',
-    iconClass: 'text-primary group-hover:text-on-primary',
-    iconPath: '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>',
-  },
-  {
-    name: '威胁扫描器',
-    desc: '实时安全分析与漏洞检测引擎。',
-    status: '运行中',
-    statusClass: 'text-success',
-    elite: true,
-    bgClass: 'bg-error-container/20 group-hover:bg-error-container',
-    iconClass: 'text-error group-hover:text-on-error',
-    iconPath: '<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>',
-  },
-  {
-    name: '记忆索引器',
-    desc: '持久化记忆管理，支持向量语义检索。',
-    status: '即将上线',
-    statusClass: 'text-on-surface-variant',
-    elite: false,
-    bgClass: 'bg-surface-container group-hover:bg-outline-variant',
-    iconClass: 'text-on-surface-variant group-hover:text-on-surface',
-    iconPath: '<rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>',
-  },
-]
+import { computed, ref, watch } from 'vue'
+import { useUserStore } from '../stores/user'
+import { useToolsStore } from '../stores/tools'
+import { Button as TinyButton, DialogBox as TinyDialogBox } from '@opentiny/vue'
+
+const userStore = useUserStore()
+const toolsStore = useToolsStore()
+const hasTools = computed(() => toolsStore.builtinTools.length + toolsStore.customTools.length > 0)
+
+// Keep the public tool catalog fresh on initial load and auth changes.
+watch(() => userStore.isLoggedIn, () => {
+  toolsStore.fetchTools()
+}, { immediate: true })
+
+// Delete
+const showDeleteDialog = ref(false)
+const deleteTarget = ref(null)
+const deleteLoading = ref(false)
+
+function confirmDelete(tool) {
+  deleteTarget.value = tool
+  showDeleteDialog.value = true
+}
+
+async function handleDelete() {
+  deleteLoading.value = true
+  try {
+    await toolsStore.deleteTool(deleteTarget.value.id)
+    showDeleteDialog.value = false
+  } finally {
+    deleteLoading.value = false
+  }
+}
 </script>

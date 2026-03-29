@@ -7,14 +7,16 @@ from app.api.router import api_router
 from app.core.config import settings
 from app.core.providers import seed_internal_providers
 from app.db.session import get_db
+from app.services.tool_manager import seed_builtin_tools
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    """Seed internal providers on startup."""
+    """Seed internal providers and builtin tools on startup."""
     db = next(get_db())
     try:
         seed_internal_providers(db)
+        seed_builtin_tools(db)
     finally:
         db.close()
     yield

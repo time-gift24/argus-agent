@@ -1,4 +1,9 @@
 import copy
+
+from sqlalchemy.orm import Session
+
+from app.models.tool import Tool
+from app.tools import BUILTIN_TOOLS
 from app.tools.loader import load_builtin_tool, extract_metadata
 
 
@@ -36,3 +41,23 @@ class ToolManager:
     def list_names(self) -> list[str]:
         """Return all registered builtin tool names."""
         return list(self._registry.keys())
+
+
+def seed_builtin_tools(db: Session) -> None:
+    """Register builtin tools in memory and upsert their metadata into the database."""
+    manager = ToolManager.get_instance()
+
+    for module_path in BUILTIN_TOOLS:
+        manager.register(module_path)
+
+    for name in manager.list_names():
+        _, meta = manager._registry[name]
+        record = db.query(Tool).filter(Tool.name == name).first()
+        if record:
+            record.description = meta["description"]
+            record.argus_schema = meta["argus_schema"]
+            continue
+
+        db.add(Tool(**meta, is_builtin=True))
+
+    db.commit()

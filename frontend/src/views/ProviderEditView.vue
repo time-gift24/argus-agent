@@ -108,7 +108,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import * as api from '../api/providers'
-import client from '../api/client'
+import client, { getApiErrorMessage } from '../api/client'
 
 const route = useRoute()
 const router = useRouter()
@@ -145,7 +145,7 @@ async function handleTestConfig() {
     })
     testResult.value = data
   } catch (e) {
-    testResult.value = { success: false, message: e.response?.data?.detail || '连接测试失败' }
+    testResult.value = { success: false, message: getApiErrorMessage(e, '连接测试失败') }
   } finally {
     testLoading.value = false
   }
@@ -193,7 +193,7 @@ async function handleSubmit() {
     }
     router.push('/providers')
   } catch (e) {
-    error.value = e.response?.data?.detail || '操作失败'
+    error.value = getApiErrorMessage(e, '操作失败')
   } finally {
     loading.value = false
   }

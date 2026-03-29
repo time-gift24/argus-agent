@@ -170,7 +170,7 @@ import { ref, reactive, watch } from 'vue'
 import { useUserStore } from '../stores/user'
 import { useProvidersStore } from '../stores/providers'
 import { Button as TinyButton, DialogBox as TinyDialogBox } from '@opentiny/vue'
-import client from '../api/client'
+import client, { getApiErrorMessage } from '../api/client'
 
 const userStore = useUserStore()
 const providersStore = useProvidersStore()
@@ -211,7 +211,7 @@ async function handleTest(provider) {
     const { data } = await client.post(`/providers/${provider.id}/test`)
     testResults.set(provider.id, data)
   } catch (e) {
-    testResults.set(provider.id, { success: false, message: e.response?.data?.detail || '连接测试失败' })
+    testResults.set(provider.id, { success: false, message: getApiErrorMessage(e, '连接测试失败') })
   } finally {
     testingIds.delete(provider.id)
   }

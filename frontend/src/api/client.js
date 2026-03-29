@@ -5,6 +5,13 @@ const client = axios.create({
   timeout: 10000,
 })
 
+export function getApiErrorMessage(error, fallback = '操作失败') {
+  if (error?.response?.status === 401) {
+    return '请先登录后再继续'
+  }
+  return error?.response?.data?.detail || fallback
+}
+
 // Request interceptor: inject JWT
 client.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')

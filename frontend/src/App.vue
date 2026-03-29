@@ -370,9 +370,18 @@ onUnmounted(() => document.removeEventListener('click', onDocumentClick))
 function onAuthUnauthorized() {
   userStore.logout()
   showUserMenu.value = false
+  loginError.value = '登录已失效，请重新登录'
+  showLoginDialog.value = true
 }
 onMounted(() => window.addEventListener('auth:unauthorized', onAuthUnauthorized))
 onUnmounted(() => window.removeEventListener('auth:unauthorized', onAuthUnauthorized))
+
+function onAuthRequired() {
+  loginError.value = '请先登录后再继续'
+  showLoginDialog.value = true
+}
+onMounted(() => window.addEventListener('auth:required', onAuthRequired))
+onUnmounted(() => window.removeEventListener('auth:required', onAuthRequired))
 </script>
 
 <style scoped>

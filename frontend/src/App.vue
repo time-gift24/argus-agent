@@ -5,15 +5,12 @@
     <aside
       class="fixed left-0 top-0 h-screen flex flex-col justify-between bg-surface-container-low border-r border-outline-variant/30 z-[60] sidebar-transition overflow-hidden"
       :class="[
-        (isCollapsed && !mobileOpen) ? 'w-20' : 'w-64',
-        { 'hover:w-64 hover:shadow-xl': isCollapsed && !mobileOpen },
+        (isCollapsed && !mobileOpen) ? 'w-16' : 'w-64',
         { 'hidden md:flex': !mobileOpen },
         { 'flex': mobileOpen }
       ]"
-      @mouseenter="onSidebarEnter"
-      @mouseleave="onSidebarLeave"
     >
-      <div class="space-y-6">
+      <div :class="sidebarShowsText ? 'space-y-6' : 'space-y-3'">
         <div
           class="flex items-center gap-3 px-2 h-16 mb-2"
           :class="sidebarShowsText ? '' : 'justify-center'"
@@ -35,29 +32,23 @@
             v-for="item in sidebarItems"
             :key="item.path"
             :to="item.path"
-            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 overflow-hidden"
+            class="flex items-center gap-3 text-sm font-medium transition-all duration-300 overflow-hidden"
             :class="[
-              sidebarShowsText ? '' : 'justify-center',
+              sidebarShowsText
+                ? 'mx-2 px-3 py-2.5 rounded-lg'
+                : 'mx-auto h-9 w-9 justify-center rounded-lg p-0 gap-0',
               isActiveRoute(item.path)
-                ? 'bg-white text-primary shadow-sm'
+                ? (sidebarShowsText
+                    ? 'bg-surface-container text-primary shadow-sm'
+                    : 'bg-primary/10 text-primary')
                 : 'text-on-surface-variant hover:bg-surface-container'
             ]"
             @click="mobileOpen = false"
           >
-            <component :is="item.icon" class="w-5 h-5 min-w-[20px]" />
+            <component :is="item.icon" class="h-5 w-5 min-w-[20px] shrink-0" />
             <span v-if="sidebarShowsText" class="whitespace-nowrap">{{ item.name }}</span>
           </router-link>
         </nav>
-
-        <div v-if="sidebarShowsText" class="pt-4 flex justify-center">
-          <button class="w-full py-3 border-2 border-dashed border-outline-variant text-outline hover:border-primary hover:text-primary rounded-xl text-xs font-bold transition-colors uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer">
-            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"/>
-              <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            <span class="whitespace-nowrap">新增模块</span>
-          </button>
-        </div>
       </div>
 
       <div class="space-y-1 border-t border-outline-variant/30 pt-4">
@@ -223,16 +214,16 @@
 </template>
 
 <script setup>
-import { ref, computed, markRaw, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useUserStore } from './stores/user'
 import { Button as TinyButton, DialogBox as TinyDialogBox } from '@opentiny/vue'
+import { Database, LayoutDashboard, ScrollText, Server, Settings, Wrench } from 'lucide-vue-next'
 
 const route = useRoute()
 const userStore = useUserStore()
 const isCollapsed = ref(false)
 const mobileOpen = ref(false)
-const hoverExpanded = ref(false)
 
 const showLoginDialog = ref(false)
 const showUserMenu = ref(false)
@@ -249,20 +240,9 @@ const toggleSidebar = () => {
   isCollapsed.value = !isCollapsed.value
 }
 
-const onSidebarEnter = () => {
-  if (isCollapsed.value && !mobileOpen.value) {
-    hoverExpanded.value = true
-  }
-}
-
-const onSidebarLeave = () => {
-  hoverExpanded.value = false
-}
-
 // Whether sidebar text should be shown
 const sidebarShowsText = computed(() => {
   if (!isCollapsed.value) return true
-  if (hoverExpanded.value) return true
   if (mobileOpen.value) return true
   return false
 })
@@ -270,7 +250,7 @@ const sidebarShowsText = computed(() => {
 // Content area padding-left
 const contentPaddingClass = computed(() => {
   if (mobileOpen.value) return 'md:pl-64'
-  if (isCollapsed.value) return 'pl-20'
+  if (isCollapsed.value) return 'pl-16'
   return 'pl-64'
 })
 
@@ -283,7 +263,7 @@ const navLinks = [
   { name: '仪表盘', path: '/dashboard' },
   { name: '提供商', path: '/providers' },
   { name: '智能体', path: '/agents' },
-  { name: '工作流', path: '/tools' },
+  { name: '工具库', path: '/tools' },
   { name: '分析', path: '/logs' },
 ]
 
@@ -291,44 +271,32 @@ const sidebarItems = [
   {
     name: '集群概览',
     path: '/dashboard',
-    icon: markRaw({
-      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`
-    })
+    icon: LayoutDashboard,
   },
   {
-    name: '逻辑设计器',
+    name: '工具库',
     path: '/tools',
-    icon: markRaw({
-      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><line x1="12" y1="8" x2="5" y2="16"/><line x1="12" y1="8" x2="19" y2="16"/></svg>`
-    })
+    icon: Wrench,
   },
   {
     name: '记忆库',
     path: '/shell',
-    icon: markRaw({
-      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`
-    })
+    icon: Database,
   },
   {
     name: 'LLM 提供商',
     path: '/providers',
-    icon: markRaw({
-      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>`
-    })
+    icon: Server,
   },
   {
     name: '系统日志',
     path: '/logs',
-    icon: markRaw({
-      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`
-    })
+    icon: ScrollText,
   },
   {
     name: '设置',
     path: '/settings',
-    icon: markRaw({
-      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`
-    })
+    icon: Settings,
   },
 ]
 

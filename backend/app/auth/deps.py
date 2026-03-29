@@ -77,8 +77,30 @@ def get_current_user(
         "oauth_provider": user.oauth_provider,
         "oauth_subject": user.oauth_subject,
         "meta_data": user.meta_data,
+        "is_admin": user.is_admin,
         "created_at": user.created_at,
         "updated_at": user.updated_at,
+    }
+
+
+def get_current_user_with_admin(
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> dict:
+    """Dependency that returns user dict including is_admin flag."""
+    from app.models.user import User
+
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return {
+        "id": user.id,
+        "name": user.name,
+        "is_admin": user.is_admin,
     }
 
 

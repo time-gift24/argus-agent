@@ -6,6 +6,7 @@ from sqlalchemy import engine_from_config, pool
 from app.core.config import settings
 from app.db.base_class import Base
 from app.models.user import User, Provider, UserProvider  # noqa: F401
+from app.models.mcp_config import McpServerConfig  # noqa: F401
 
 # this is the Alembic Config object
 config = context.config

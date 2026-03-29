@@ -3,6 +3,7 @@ import assert from 'node:assert/strict'
 
 import {
   addProviderModelDraft,
+  buildProviderTestPayload,
   buildProviderPayload,
   removeProviderModelDraft,
 } from './providerModelDrafts.js'
@@ -49,5 +50,27 @@ test('buildProviderPayload includes initial models during create flow only', () 
       api_key: 'sk-test',
       base_url: null,
     },
+  })
+})
+
+test('buildProviderTestPayload trims and forwards the selected test model', () => {
+  assert.deepEqual(buildProviderTestPayload({
+    api_key: '  sk-test  ',
+    base_url: '  https://api.example.com/v1  ',
+    test_model: '  deepseek-chat  ',
+  }), {
+    api_key: 'sk-test',
+    base_url: 'https://api.example.com/v1',
+    model: 'deepseek-chat',
+  })
+
+  assert.deepEqual(buildProviderTestPayload({
+    api_key: 'sk-test',
+    base_url: '',
+    test_model: '   ',
+  }), {
+    api_key: 'sk-test',
+    base_url: null,
+    model: null,
   })
 })

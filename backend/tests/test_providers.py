@@ -102,6 +102,20 @@ class TestProviderCRUD:
         assert models[0]["is_default"] is True
         assert models[1]["is_default"] is False
 
+    def test_list_user_providers_includes_default_model_summary(self, client: TestClient):
+        token = _dev_login(client)
+        provider = _create_provider(client, token, models=["gpt-4o", "gpt-4o-mini"])
+
+        resp = client.get(
+            "/api/v1/providers",
+            headers={"Authorization": f"Bearer {token}"},
+        )
+        assert resp.status_code == 200
+
+        [listed_provider] = [item for item in resp.json() if item["id"] == provider["id"]]
+        assert listed_provider["default_model_name"] == "gpt-4o"
+        assert listed_provider["model_count"] == 2
+
     def test_first_provider_becomes_default(self, client: TestClient):
         token = _dev_login(client)
         resp = client.post(

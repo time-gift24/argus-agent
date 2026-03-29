@@ -686,7 +686,7 @@ components:
 
     UserProviderRead:
       type: object
-      required: [id, name, kind, is_default, created_at]
+      required: [id, name, kind, is_default, created_at, model_count]
       properties:
         id:
           type: string
@@ -708,6 +708,16 @@ components:
           type: string
           format: date-time
           description: When this association was created
+        default_model_name:
+          type: string
+          nullable: true
+          description: Default model name currently used for provider-level testing
+          example: gpt-4o
+        model_count:
+          type: integer
+          minimum: 0
+          description: Number of configured models under this provider
+          example: 2
 
     ProviderCreate:
       type: object

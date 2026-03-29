@@ -130,12 +130,15 @@ def list_user_providers(
     result = []
     for assoc in associations:
         p = assoc.provider
+        default_model = next((model for model in p.models if model.is_default), None)
         result.append(UserProviderRead(
             id=p.id,
             name=p.name,
             kind=p.kind.value,
             is_default=assoc.is_default,
             created_at=assoc.created_at,
+            default_model_name=default_model.name if default_model else None,
+            model_count=len(p.models),
         ))
     return result
 
@@ -281,6 +284,8 @@ def set_default_provider(
         kind=p.kind.value,
         is_default=target.is_default,
         created_at=target.created_at,
+        default_model_name=next((model.name for model in p.models if model.is_default), None),
+        model_count=len(p.models),
     )
 
 

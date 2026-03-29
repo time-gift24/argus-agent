@@ -23,12 +23,18 @@ function handleAddModelDraft() {
   form.value.models = result.models
   modelDraftError.value = result.error
   if (!result.error) {
+    if (!form.value.test_model) {
+      form.value.test_model = result.models.at(-1) || ''
+    }
     modelDraftName.value = ''
   }
 }
 
 function handleRemoveModelDraft(name) {
   form.value.models = removeProviderModelDraft(form.value.models ?? [], name)
+  if (form.value.test_model === name) {
+    form.value.test_model = form.value.models[0] || ''
+  }
   modelDraftError.value = ''
 }
 </script>
@@ -79,6 +85,39 @@ function handleRemoveModelDraft(name) {
       </div>
     </section>
 
+    <section class="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-5 shadow-sm">
+      <div class="mb-4">
+        <p class="text-[10px] font-bold uppercase tracking-[0.24em] text-on-surface-variant">测试模型</p>
+        <p class="mt-2 text-sm leading-relaxed text-on-surface-variant">
+          部分 provider 需要带上实际模型代码或 deployment name 才能验证成功，这里可以显式指定测试目标。
+        </p>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">模型代码（可选）</label>
+        <input
+          v-model="form.test_model"
+          list="provider-test-model-options"
+          class="mt-1.5 w-full rounded-xl border border-outline-variant/30 bg-surface-container px-4 py-2.5 text-sm font-mono transition-colors focus:border-primary focus:outline-none"
+          placeholder="例如：gpt-4o、deepseek-chat、deployment-name"
+        />
+        <datalist id="provider-test-model-options">
+          <option
+            v-for="modelName in form.models ?? []"
+            :key="modelName"
+            :value="modelName"
+          />
+        </datalist>
+      </div>
+
+      <p v-if="form.test_model?.trim()" class="mt-3 text-xs text-on-surface-variant">
+        当前测试会使用模型：<span class="font-mono">{{ form.test_model.trim() }}</span>
+      </p>
+      <p v-else class="mt-3 text-xs text-on-surface-variant">
+        留空时只验证 API Key / Base URL 是否可达，不校验具体模型代码。
+      </p>
+    </section>
+
     <section
       v-if="!isEdit"
       class="rounded-2xl border border-outline-variant/20 bg-surface-container-lowest p-5 shadow-sm"
@@ -86,7 +125,7 @@ function handleRemoveModelDraft(name) {
       <div class="mb-4">
         <p class="text-[10px] font-bold uppercase tracking-[0.24em] text-on-surface-variant">初始模型</p>
         <p class="mt-2 text-sm leading-relaxed text-on-surface-variant">
-          创建时可直接添加一个或多个模型名称，首个模型会自动设为默认模型。
+          创建时可直接添加一个或多个模型名称，首个模型会自动设为默认模型。模型名请填写供应商实际支持的模型代码。
         </p>
       </div>
 
@@ -116,6 +155,7 @@ function handleRemoveModelDraft(name) {
           class="inline-flex items-center gap-2 rounded-full bg-surface-container px-3 py-1.5 text-sm text-on-surface"
         >
           <span class="font-mono">{{ modelName }}</span>
+          <span v-if="form.models[0] === modelName" class="text-[10px] font-bold text-primary">默认</span>
           <button
             type="button"
             class="rounded-full px-1 text-xs text-on-surface-variant transition-colors hover:text-danger"
@@ -131,7 +171,7 @@ function handleRemoveModelDraft(name) {
       <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div>
           <p class="text-[10px] font-bold uppercase tracking-[0.24em] text-on-surface-variant">连接验证</p>
-          <p class="mt-2 text-sm leading-relaxed text-on-surface-variant">在保存前验证 API Key 和 Base URL 是否可用。</p>
+          <p class="mt-2 text-sm leading-relaxed text-on-surface-variant">在保存前验证 API Key、Base URL，以及可选的测试模型是否可用。</p>
         </div>
 
         <button

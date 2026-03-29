@@ -19,6 +19,7 @@
     <ProviderModelList
       v-if="isEdit && providerId"
       :provider-id="providerId"
+      @change="handleModelsChange"
     />
   </PageBodyShell>
 </template>
@@ -31,7 +32,7 @@ import client, { getApiErrorMessage } from '../api/client'
 import PageBodyShell from '../components/PageBodyShell.vue'
 import ProviderConfigForm from '../components/ProviderConfigForm.vue'
 import ProviderModelList from '../components/ProviderModelList.vue'
-import { buildProviderPayload } from '../utils/providerModelDrafts'
+import { buildProviderPayload, buildProviderTestPayload } from '../utils/providerModelDrafts'
 import { breadcrumb } from '../utils/pageShell'
 
 const route = useRoute()
@@ -44,6 +45,7 @@ const form = ref({
   api_key: '',
   base_url: '',
   models: [],
+  test_model: '',
 })
 const pageTitle = computed(() => (isEdit.value ? '编辑提供商' : '新增提供商'))
 const pageDescription = computed(() => (
@@ -71,11 +73,7 @@ async function handleTestConfig() {
   testLoading.value = true
   testResult.value = null
   try {
-    const { data } = await client.post('/providers/test-config', {
-      api_key: form.value.api_key.trim(),
-      base_url: form.value.base_url.trim() || null,
-      model: null,
-    })
+    const { data } = await client.post('/providers/test-config', buildProviderTestPayload(form.value))
     testResult.value = data
   } catch (e) {
     testResult.value = { success: false, message: getApiErrorMessage(e, '连接测试失败') }
@@ -93,12 +91,22 @@ onMounted(async () => {
         api_key: data.config?.api_key || '',
         base_url: data.config?.base_url || '',
         models: [],
+        test_model: '',
       }
     } catch (e) {
       error.value = '加载提供商信息失败'
     }
   }
 })
+
+function handleModelsChange(models) {
+  form.value.models = models.map((model) => model.name)
+
+  if (!form.value.test_model) {
+    const defaultModel = models.find((model) => model.is_default)
+    form.value.test_model = defaultModel?.name || ''
+  }
+}
 
 async function handleSubmit() {
   if (!form.value.name.trim() || !form.value.api_key.trim()) {

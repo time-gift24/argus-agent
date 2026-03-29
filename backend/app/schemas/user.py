@@ -77,6 +77,8 @@ class UserProviderRead(BaseModel):
     kind: str
     is_default: bool
     created_at: datetime
+    default_model_name: str | None = None
+    model_count: int = 0
 
     model_config = {"from_attributes": True}
 

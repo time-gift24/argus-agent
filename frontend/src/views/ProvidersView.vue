@@ -76,7 +76,7 @@
                   <h3 class="font-headline font-bold text-sm text-on-surface">{{ p.name }}</h3>
                   <div class="flex items-center gap-2 mt-0.5">
                     <span v-if="p.is_default" class="text-[10px] font-bold text-primary">★ 默认</span>
-                    <span class="text-[10px] text-on-surface-variant font-mono">{{ maskKey(p.config?.api_key) }}</span>
+                    <span class="text-[10px] text-on-surface-variant font-mono">{{ p.model_count || 0 }} models</span>
                   </div>
                 </div>
               </div>
@@ -84,13 +84,16 @@
 
             <!-- Config info -->
             <div class="space-y-1.5 mb-4 text-xs text-on-surface-variant">
-              <div v-if="p.config?.base_url" class="flex items-center gap-1.5">
-                <span class="text-[10px] font-bold tracking-widest uppercase">URL</span>
-                <span class="font-mono truncate">{{ p.config.base_url }}</span>
+              <div v-if="p.default_model_name" class="flex items-center gap-1.5">
+                <span class="text-[10px] font-bold tracking-widest uppercase">默认模型</span>
+                <span class="font-mono">{{ p.default_model_name }}</span>
               </div>
-              <div v-if="p.config?.model" class="flex items-center gap-1.5">
-                <span class="text-[10px] font-bold tracking-widest uppercase">模型</span>
-                <span class="font-mono">{{ p.config.model }}</span>
+              <div class="flex items-center gap-1.5">
+                <span class="text-[10px] font-bold tracking-widest uppercase">模型数</span>
+                <span class="font-mono">{{ p.model_count || 0 }}</span>
+              </div>
+              <div v-if="!p.default_model_name" class="text-[11px] leading-relaxed text-on-surface-variant">
+                尚未设置默认模型，请先进入编辑页添加模型并设置默认值。
               </div>
             </div>
 
@@ -99,11 +102,14 @@
               <div v-if="testResults.get(p.id).success" class="flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-success shrink-0"></span>
                 <span class="text-success font-semibold">连接成功</span>
+                <span v-if="p.default_model_name" class="text-on-surface-variant font-mono">({{ p.default_model_name }})</span>
                 <span v-if="testResults.get(p.id).latency_ms != null" class="text-on-surface-variant font-mono">{{ testResults.get(p.id).latency_ms }}ms</span>
               </div>
               <div v-else class="flex items-start gap-2">
                 <span class="w-2 h-2 rounded-full bg-danger mt-0.5 shrink-0"></span>
-                <span class="text-danger">{{ testResults.get(p.id).message }}</span>
+                <span class="text-danger">
+                  <template v-if="p.default_model_name">默认模型 {{ p.default_model_name }}：</template>{{ testResults.get(p.id).message }}
+                </span>
               </div>
             </div>
 
@@ -124,11 +130,11 @@
               </router-link>
               <button
                 class="px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase text-on-surface-variant hover:text-tertiary-fixed-dim rounded-lg hover:bg-surface-container transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-wait"
-                :disabled="testingIds.has(p.id)"
+                :disabled="testingIds.has(p.id) || !p.default_model_name"
                 @click="handleTest(p)"
               >
                 <template v-if="testingIds.has(p.id)">测试中...</template>
-                <template v-else>测试连接</template>
+                <template v-else>{{ p.default_model_name ? '测试默认模型' : '先配置模型' }}</template>
               </button>
               <button
                 class="px-3 py-1.5 text-[10px] font-bold tracking-widest uppercase text-on-surface-variant hover:text-danger rounded-lg hover:bg-surface-container transition-colors cursor-pointer ml-auto"
@@ -213,12 +219,6 @@ async function handleTest(provider) {
   } finally {
     testingIds.delete(provider.id)
   }
-}
-
-function maskKey(key) {
-  if (!key) return '••••••••'
-  if (key.length <= 8) return '••••••••'
-  return key.slice(0, 4) + '••••' + key.slice(-4)
 }
 
 // Fetch providers when logged in

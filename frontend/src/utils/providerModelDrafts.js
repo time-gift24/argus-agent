@@ -45,3 +45,11 @@ export function buildProviderPayload(form, { includeModels = false } = {}) {
 
   return payload
 }
+
+export function buildProviderTestPayload(form) {
+  return {
+    api_key: form.api_key.trim(),
+    base_url: form.base_url.trim() || null,
+    model: normalizeProviderModelName(form.test_model) || null,
+  }
+}

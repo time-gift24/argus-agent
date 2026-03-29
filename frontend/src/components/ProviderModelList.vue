@@ -7,6 +7,7 @@ import { getApiErrorMessage } from '../api/client'
 const props = defineProps({
   providerId: { type: String, required: true },
 })
+const emit = defineEmits(['change'])
 
 const models = ref([])
 const loading = ref(false)
@@ -23,6 +24,7 @@ async function fetchModels() {
   try {
     const { data } = await api.listModels(props.providerId)
     models.value = data
+    emit('change', data)
   } catch {
     error.value = '加载模型列表失败'
   } finally {
@@ -39,6 +41,7 @@ async function handleAddModel() {
   try {
     const { data } = await api.addModel(props.providerId, name)
     models.value.push(data)
+    emit('change', models.value)
     newModelName.value = ''
   } catch (e) {
     error.value = getApiErrorMessage(e, '添加模型失败')
@@ -61,11 +64,12 @@ async function handleDeleteModel(modelId) {
 async function handleSetDefault(modelId) {
   error.value = ''
   try {
-    const { data } = await api.setDefaultModel(props.providerId, modelId)
+    await api.setDefaultModel(props.providerId, modelId)
     models.value = models.value.map(m => ({
       ...m,
       is_default: m.id === modelId,
     }))
+    emit('change', models.value)
   } catch (e) {
     error.value = getApiErrorMessage(e, '设置默认失败')
   }

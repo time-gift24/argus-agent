@@ -13,12 +13,31 @@ from app.db.session import get_db
 from app.models.user import Provider, ProviderKind, UserProvider
 from app.schemas.user import (
     DefaultUpdate,
+    ProviderConfigInput,
     ProviderCreate,
     ProviderRead,
+    ProviderTestResult,
     UserProviderRead,
 )
+from app.services.provider_test import test_config_connectivity, test_provider_connectivity
 
 router = APIRouter(tags=["providers"])
+
+
+# ── Test config (no provider needed) ──────────────────────────────────────────
+
+
+@router.post(
+    "/providers/test-config",
+    response_model=ProviderTestResult,
+    name="test_provider_config",
+)
+def test_provider_config(
+    config: ProviderConfigInput,
+    _: str = Depends(get_current_user_id),
+) -> ProviderTestResult:
+    """Test connectivity with raw config (for create/edit forms)."""
+    return test_config_connectivity(config.model_dump())
 
 
 # ── Internal providers ────────────────────────────────────────────────────────
@@ -178,3 +197,29 @@ def set_default_provider(
         is_default=target.is_default,
         created_at=target.created_at,
     )
+
+
+@router.post(
+    "/providers/{provider_id}/test",
+    response_model=ProviderTestResult,
+    name="test_user_provider",
+)
+def test_user_provider(
+    provider_id: str,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> ProviderTestResult:
+    """Test connectivity of a user provider."""
+    assoc = (
+        db.query(UserProvider)
+        .filter(UserProvider.user_id == user_id, UserProvider.provider_id == provider_id)
+        .first()
+    )
+    if not assoc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Provider not found")
+
+    provider = assoc.provider
+    if provider.kind == ProviderKind.INTERNAL:
+        return ProviderTestResult(success=False, message="内部提供商不支持测试")
+
+    return test_provider_connectivity(provider)

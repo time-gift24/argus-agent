@@ -4,9 +4,9 @@
     <div class="flex items-center justify-between shrink-0 animate-fade-up">
       <div>
         <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">
-          Interactive <span class="text-primary">Console</span>
+          交互式 <span class="text-primary">控制台</span>
         </h1>
-        <p class="text-sm text-on-surface-variant mt-1">Command-line interface for direct agent interaction</p>
+        <p class="text-sm text-on-surface-variant mt-1">直接与智能体交互的命令行界面</p>
       </div>
       <div class="flex items-center gap-2">
         <tiny-button plain @click="clearHistory">
@@ -15,7 +15,7 @@
               <polyline points="3 6 5 6 21 6"/>
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
             </svg>
-            Clear
+            清空
           </span>
         </tiny-button>
         <tiny-button plain>
@@ -25,7 +25,7 @@
               <polyline points="7 10 12 15 17 10"/>
               <line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            Export
+            导出
           </span>
         </tiny-button>
       </div>
@@ -42,7 +42,7 @@
             <div class="w-3 h-3 rounded-full bg-warning"></div>
             <div class="w-3 h-3 rounded-full bg-success"></div>
           </div>
-          <span class="text-[10px] text-inverse-on-surface/50 font-semibold uppercase tracking-widest font-headline">Axiom Console</span>
+          <span class="text-[10px] text-inverse-on-surface/50 font-semibold uppercase tracking-widest font-headline">Axiom 控制台</span>
         </div>
         <div class="flex items-center gap-1.5">
           <span class="text-[10px] text-inverse-on-surface/30 font-mono">bash</span>
@@ -64,12 +64,12 @@
           <div class="mb-1">
             <span class="text-inverse-on-surface/60">+======================================+</span>
           </div>
-          <div class="text-center">Axiom Azure Agent System [v2.4.0]</div>
-          <div class="text-inverse-on-surface/30 text-[11px] text-center">(c) 2026 Axiom Corp. All rights reserved.</div>
+          <div class="text-center">Axiom Azure 智能体系统 [v2.4.0]</div>
+          <div class="text-inverse-on-surface/30 text-[11px] text-center">(c) 2026 Axiom Corp. 保留所有权利。</div>
           <div class="mt-2 mb-1">
             <span class="text-inverse-on-surface/60">+======================================+</span>
           </div>
-          <div class="text-inverse-on-surface/50 text-xs">Type <span class="text-primary-fixed">help</span> for available commands.</div>
+          <div class="text-inverse-on-surface/50 text-xs">输入 <span class="text-primary-fixed">help</span> 查看可用命令。</div>
         </div>
 
         <!-- History Entries -->
@@ -94,7 +94,7 @@
             ref="terminalInput"
             type="text"
             class="flex-1 bg-transparent border-none outline-none text-inverse-on-surface placeholder-inverse-on-surface/20 focus:ring-0 p-0 font-mono text-[13px]"
-            placeholder="Enter command..."
+            placeholder="输入命令..."
             @keydown.enter="executeCommand"
             @keydown.up.prevent="navigateHistory('up')"
             @keydown.down.prevent="navigateHistory('down')"
@@ -106,12 +106,12 @@
       <!-- Status Bar -->
       <div class="bg-inverse-surface/80 px-5 py-2 border-t border-outline-variant/20 flex items-center justify-between shrink-0">
         <div class="flex items-center gap-4">
-          <span class="text-[10px] text-inverse-on-surface/30 font-mono">{{ history.length }} entries</span>
-          <span class="text-[10px] text-inverse-on-surface/30 font-mono">Type help for commands</span>
+          <span class="text-[10px] text-inverse-on-surface/30 font-mono">{{ history.length }} 条记录</span>
+          <span class="text-[10px] text-inverse-on-surface/30 font-mono">输入 help 查看命令</span>
         </div>
         <div class="flex items-center gap-1.5">
           <div class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></div>
-          <span class="text-[10px] text-success font-semibold">Ready</span>
+          <span class="text-[10px] text-success font-semibold">就绪</span>
         </div>
       </div>
     </div>
@@ -139,12 +139,12 @@ const executeCommand = async () => {
   let output = ''
   switch (cmd.toLowerCase()) {
     case 'help':
-      output = `Available commands:
-  help     Show this help message
-  clear    Clear terminal history
-  list     List all registered agents
-  status   Show system status
-  version  Show system version`
+      output = `可用命令:
+  help     显示帮助信息
+  clear    清空终端历史
+  list     列出所有已注册智能体
+  status   显示系统状态
+  version  显示系统版本`
       break
     case 'clear':
       history.value = []
@@ -152,23 +152,23 @@ const executeCommand = async () => {
       return
     // @mock — list/status 命令返回硬编码数据；替换为：调用后端 API 或 WebSocket
     case 'list':
-      output = `ID   Name            Status
+      output = `ID   名称            状态
   1   Agent-001       Active
   2   Agent-002       Active
   3   Agent-003       Error
   4   Agent-004       Idle`
       break
     case 'status':
-      output = `System Health: Good
-Active Agents: 2
-Error Count: 1
-Avg Latency: 124ms`
+      output = `系统健康: 良好
+运行中智能体: 2
+异常数: 1
+平均延迟: 124ms`
       break
     case 'version':
       output = 'Axiom Azure CLI v2.4.0 (darwin-arm64)'
       break
     default:
-      output = `Command not found: ${cmd}. Type 'help' for available commands.`
+      output = `命令未找到: ${cmd}。输入 'help' 查看可用命令。`
   }
 
   history.value.push({ command: cmd, output })

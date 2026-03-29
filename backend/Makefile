@@ -39,6 +39,7 @@ test-cov-open: test-cov-report ## Run coverage and open report in browser
 
 .PHONY: dev
 dev: ## Start dev server (loads .env.dev automatically)
+	uv run alembic upgrade head
 	uv run uvicorn main:app --reload --port 8000
 
 .PHONY: install-dev

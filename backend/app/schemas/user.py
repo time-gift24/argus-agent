@@ -75,3 +75,11 @@ class ProviderCreate(BaseModel):
 
 class DefaultUpdate(BaseModel):
     """Empty body for PUT /providers/{id}/default."""
+
+
+class ProviderTestResult(BaseModel):
+    """Response schema for provider connectivity test."""
+
+    success: bool
+    message: str
+    latency_ms: int | None = None

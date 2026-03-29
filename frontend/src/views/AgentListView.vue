@@ -4,8 +4,8 @@
     <!-- Page Header -->
     <div class="flex items-center justify-between animate-fade-up">
       <div>
-        <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">Agent <span class="text-primary">Management</span></h1>
-        <p class="text-sm text-on-surface-variant mt-1">Monitor and manage all registered agents</p>
+        <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">智能体 <span class="text-primary">管理</span></h1>
+        <p class="text-sm text-on-surface-variant mt-1">监控和管理所有已注册的智能体</p>
       </div>
       <div class="flex items-center gap-2">
         <tiny-button type="primary">
@@ -14,7 +14,7 @@
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            Create Agent
+            创建智能体
           </span>
         </tiny-button>
         <tiny-button plain>
@@ -22,7 +22,7 @@
             <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M23 4l-6 6M17 4h6v6M1 20l6-6M7 20H1v-6"/>
             </svg>
-            Refresh
+            刷新
           </span>
         </tiny-button>
       </div>
@@ -31,7 +31,7 @@
     <!-- Filters -->
     <div class="bg-surface-container-lowest p-4 rounded-[2rem] border border-outline-variant/30 shadow-sm flex items-center justify-between gap-4 flex-wrap animate-fade-up animate-delay-1">
       <div class="flex items-center gap-3">
-        <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Status:</span>
+        <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">状态:</span>
         <div class="flex gap-1">
           <button
             v-for="status in filterOptions"
@@ -53,21 +53,21 @@
           <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <polygon points="5 3 19 12 5 21 5 3"/>
           </svg>
-          Start
+          启动
         </button>
         <button class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-warning border border-warning/20 bg-warning/10 rounded-lg hover:bg-warning hover:text-white transition-colors cursor-pointer">
           <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <rect x="6" y="4" width="4" height="16"/>
             <rect x="14" y="4" width="4" height="16"/>
           </svg>
-          Stop
+          停止
         </button>
         <button class="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-semibold text-danger border border-danger/20 bg-danger/10 rounded-lg hover:bg-danger hover:text-white transition-colors cursor-pointer">
           <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="3 6 5 6 21 6"/>
             <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
           </svg>
-          Delete
+          删除
         </button>
       </div>
     </div>
@@ -77,7 +77,7 @@
       <tiny-grid :data="filteredAgents" border resizable auto-resize height="460">
         <tiny-grid-column type="selection" width="44"></tiny-grid-column>
 
-        <tiny-grid-column field="name" title="Agent" sortable>
+        <tiny-grid-column field="name" title="智能体" sortable>
           <template #default="data">
             <div class="flex items-center gap-2.5">
               <div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary shrink-0">
@@ -96,7 +96,7 @@
           </template>
         </tiny-grid-column>
 
-        <tiny-grid-column field="status" title="Status" width="110" sortable>
+        <tiny-grid-column field="status" title="状态" width="110" sortable>
           <template #default="data">
             <div class="flex items-center gap-2">
               <div class="w-2 h-2 rounded-full shrink-0" :class="statusDotClass(data.row.status)"></div>
@@ -122,19 +122,19 @@
           </template>
         </tiny-grid-column>
 
-        <tiny-grid-column field="memory" title="Memory" width="100" sortable align="center">
+        <tiny-grid-column field="memory" title="内存" width="100" sortable align="center">
           <template #default="data">
             <span class="text-[11px] font-mono font-semibold text-on-surface-variant">{{ data.row.memory }} MB</span>
           </template>
         </tiny-grid-column>
 
-        <tiny-grid-column field="lastSeen" title="Last Active" width="150" sortable>
+        <tiny-grid-column field="lastSeen" title="最近活跃" width="150" sortable>
           <template #default="data">
             <span class="text-[11px] text-on-surface-variant font-mono">{{ data.row.lastSeen }}</span>
           </template>
         </tiny-grid-column>
 
-        <tiny-grid-column title="Actions" width="100" align="center">
+        <tiny-grid-column title="操作" width="100" align="center">
           <template #default="data">
             <div class="flex items-center justify-center gap-1">
               <button class="p-1.5 rounded-lg hover:bg-surface-container text-on-surface-variant hover:text-primary transition-colors cursor-pointer" title="View">
@@ -168,10 +168,10 @@ const agentStore = useAgentStore()
 const { agents } = storeToRefs(agentStore)
 
 const filterOptions = [
-  { key: 'All', label: 'All' },
-  { key: 'Active', label: 'Active' },
-  { key: 'Idle', label: 'Idle' },
-  { key: 'Error', label: 'Error' },
+  { key: 'All', label: '全部' },
+  { key: 'Active', label: '运行中' },
+  { key: 'Idle', label: '空闲' },
+  { key: 'Error', label: '异常' },
 ]
 const filter = ref('All')
 

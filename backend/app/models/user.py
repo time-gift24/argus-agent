@@ -37,6 +37,7 @@ class User(Base):
     oauth_provider: Mapped[str] = mapped_column(String(64), nullable=False)
     oauth_subject: Mapped[str] = mapped_column(String(256), nullable=False)
     meta_data: Mapped[dict] = mapped_column(JSON, default=dict)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, default=_utc_now
     )

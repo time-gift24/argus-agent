@@ -13,6 +13,7 @@ from app.db.session import get_db
 def get_current_user_id(
     request: Request,
     authorization: str | None = Header(None, alias="Authorization"),
+    db: Session = Depends(get_db),
 ) -> str:
     """
     Dependency that extracts and verifies the JWT from the Authorization header.
@@ -45,6 +46,16 @@ def get_current_user_id(
             detail=str(e),
             headers={"WWW-Authenticate": "Bearer"},
         ) from e
+
+    from app.models.user import User
+
+    user = db.get(User, payload.sub)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
     request.state.user_id = payload.sub
     return payload.sub

@@ -1,7 +1,11 @@
 """Integration tests: provider CRUD."""
 
+import uuid
+
 import pytest
 from fastapi.testclient import TestClient
+
+from app.auth.jwt import create_token
 
 
 def _dev_login(client: TestClient, name: str = "alice") -> str:
@@ -180,6 +184,18 @@ class TestProviderCRUD:
         )
         assert resp.status_code == 201
         assert "config" not in resp.json()
+
+    def test_create_provider_with_token_for_missing_user_returns_401(self, client: TestClient):
+        token = create_token(user_id=str(uuid.uuid4()), name="ghost")
+
+        resp = client.post(
+            "/api/v1/providers",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"name": "GhostProvider", "config": {"api_key": "sk-ghost"}},
+        )
+
+        assert resp.status_code == 401
+        assert resp.json()["detail"] == "User not found"
 
 
 class TestDefaultProviderReassignment:

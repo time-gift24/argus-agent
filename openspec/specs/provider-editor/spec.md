@@ -1,5 +1,9 @@
-## MODIFIED Requirements
+# provider-editor Specification
 
+## Purpose
+定义 Provider 新增与编辑页面的路由、表单和面包屑行为。
+
+## Requirements
 ### Requirement: Provider 新增页面
 系统 SHALL 提供 `/providers/new` 路由用于新增 LLM 提供商，并以独立 body 页面承载完整表单而非弹窗。
 
@@ -29,10 +33,9 @@
 - **THEN** 成功后重定向到 `/providers`
 
 ### Requirement: 面包屑导航
-编辑/新增页面 SHALL 在 body 顶部左侧显示固定面包屑导航。
+编辑/新增页面 SHALL 在 body 顶部左侧显示统一模板渲染的面包屑导航。
 
 #### Scenario: 面包屑交互
 - **WHEN** 用户在编辑/新增页面
 - **THEN** 面包屑 "LLM 提供商" 可点击，导航回 `/providers`
 - **THEN** 当前页面名称不可点击（面包屑末尾）
-- **THEN** 页面滚动时面包屑仍保持在全局 top nav 下方可见

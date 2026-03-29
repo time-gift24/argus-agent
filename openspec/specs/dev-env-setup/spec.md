@@ -1,5 +1,9 @@
-## ADDED Requirements
+# dev-env-setup Specification
 
+## Purpose
+定义后端开发环境的一键启动行为与默认访问方式。
+
+## Requirements
 ### Requirement: make dev 启动开发服务器
 开发者 SHALL 能通过 `make dev` 一行命令启动后端开发服务器，无需手动创建 `.env` 或设置环境变量。
 

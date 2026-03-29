@@ -1,5 +1,9 @@
-## ADDED Requirements
+# user-profile Specification
 
+## Purpose
+定义用户自助资料读取与更新 API 行为。
+
+## Requirements
 ### Requirement: Authenticated user can retrieve own profile
 
 The system SHALL allow authenticated users to retrieve their own profile via `GET /me`.

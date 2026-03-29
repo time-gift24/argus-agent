@@ -1,72 +1,22 @@
 <template>
   <div class="min-h-screen bg-surface architectural-grid font-body text-on-surface">
 
-    <!-- Top Navigation Bar -->
-    <nav class="fixed top-0 w-full h-16 flex items-center justify-between px-6 bg-surface-container-low/70 backdrop-blur-xl z-50 shadow-sm border-b border-outline-variant/30">
-      <div class="flex items-center gap-4 min-w-[200px]">
-        <button
-          class="text-on-surface-variant hover:text-primary transition-colors p-1 cursor-pointer"
-          @click="toggleSidebar"
-        >
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <line x1="3" y1="12" x2="21" y2="12"/>
-            <line x1="3" y1="18" x2="21" y2="18"/>
-          </svg>
-        </button>
-        <span class="text-xl font-bold text-primary font-headline tracking-tight">Axiom Azure</span>
-      </div>
-
-      <div class="hidden md:flex items-center gap-8 justify-center flex-1">
-        <router-link
-          v-for="link in navLinks"
-          :key="link.path"
-          :to="link.path"
-          class="font-headline tracking-tight transition-colors duration-200 text-sm"
-          :class="[isActiveRoute(link.path)
-            ? 'text-primary border-b-2 border-primary font-semibold'
-            : 'text-on-surface-variant hover:text-primary']"
-        >
-          {{ link.name }}
-        </router-link>
-      </div>
-
-      <div class="flex items-center gap-4 min-w-[200px] justify-end">
-        <div class="hidden sm:flex items-center bg-surface-container-low px-3 py-1.5 rounded-full gap-2 text-on-surface-variant border border-outline-variant/30">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8"/>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input
-            class="bg-transparent border-none focus:outline-none text-sm w-32 xl:w-48 font-label"
-            placeholder="Search..."
-            type="text"
-          />
-        </div>
-
-        <button class="relative text-on-surface-variant hover:text-primary transition-colors cursor-pointer">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-error rounded-full"></span>
-        </button>
-
-        <tiny-button type="primary" round>
-          <span class="font-headline font-semibold">Deploy Agent</span>
-        </tiny-button>
-      </div>
-    </nav>
-
-    <!-- Sidebar -->
+    <!-- Sidebar (fixed overlay) -->
     <aside
-      class="fixed left-0 top-0 h-screen p-4 flex flex-col justify-between bg-surface-container-low border-r border-outline-variant/30 z-[60] sidebar-transition overflow-hidden"
-      :class="isCollapsed ? 'w-20' : 'w-64'"
+      class="fixed left-0 top-0 h-screen flex flex-col justify-between bg-surface-container-low border-r border-outline-variant/30 z-[60] sidebar-transition overflow-hidden"
+      :class="[
+        (isCollapsed && !mobileOpen) ? 'w-20' : 'w-64',
+        { 'hover:w-64 hover:shadow-xl': isCollapsed && !mobileOpen },
+        { 'hidden md:flex': !mobileOpen },
+        { 'flex': mobileOpen }
+      ]"
+      @mouseenter="onSidebarEnter"
+      @mouseleave="onSidebarLeave"
     >
       <div class="space-y-6">
         <div
           class="flex items-center gap-3 px-2 h-16 mb-2"
-          :class="isCollapsed ? 'justify-center' : ''"
+          :class="sidebarShowsText ? '' : 'justify-center'"
         >
           <div class="w-10 h-10 min-w-[40px] rounded-lg bg-primary flex items-center justify-center text-on-primary">
             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -74,9 +24,9 @@
               <path d="M9 9h.01M15 9h.01M9 15h.01M15 15h.01"/>
             </svg>
           </div>
-          <div v-if="!isCollapsed" class="overflow-hidden">
-            <h3 class="font-headline font-bold text-sm leading-tight whitespace-nowrap">Core Engine</h3>
-            <p class="text-[10px] text-on-surface-variant tracking-wider uppercase">v2.4.0 Active</p>
+          <div v-if="sidebarShowsText" class="overflow-hidden">
+            <h3 class="font-headline font-bold text-sm leading-tight whitespace-nowrap">核心引擎</h3>
+            <p class="text-[10px] text-on-surface-variant tracking-wider uppercase">v2.4.0 运行中</p>
           </div>
         </div>
 
@@ -87,24 +37,25 @@
             :to="item.path"
             class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-300 overflow-hidden"
             :class="[
-              isCollapsed ? 'justify-center' : '',
+              sidebarShowsText ? '' : 'justify-center',
               isActiveRoute(item.path)
                 ? 'bg-white text-primary shadow-sm'
                 : 'text-on-surface-variant hover:bg-surface-container'
             ]"
+            @click="mobileOpen = false"
           >
             <component :is="item.icon" class="w-5 h-5 min-w-[20px]" />
-            <span v-if="!isCollapsed" class="whitespace-nowrap">{{ item.name }}</span>
+            <span v-if="sidebarShowsText" class="whitespace-nowrap">{{ item.name }}</span>
           </router-link>
         </nav>
 
-        <div v-if="!isCollapsed" class="pt-4 flex justify-center">
+        <div v-if="sidebarShowsText" class="pt-4 flex justify-center">
           <button class="w-full py-3 border-2 border-dashed border-outline-variant text-outline hover:border-primary hover:text-primary rounded-xl text-xs font-bold transition-colors uppercase tracking-widest flex items-center justify-center gap-2 cursor-pointer">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <line x1="12" y1="5" x2="12" y2="19"/>
               <line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
-            <span class="whitespace-nowrap">New Module</span>
+            <span class="whitespace-nowrap">新增模块</span>
           </button>
         </div>
       </div>
@@ -114,40 +65,214 @@
           v-for="f in footerItems"
           :key="f.name"
           class="flex items-center gap-3 px-3 py-2 text-on-surface-variant text-sm font-medium transition-colors overflow-hidden cursor-pointer"
-          :class="[isCollapsed ? 'justify-center' : '', f.class]"
+          :class="[sidebarShowsText ? '' : 'justify-center', f.class]"
         >
           <component :is="f.icon" class="w-5 h-5 min-w-[20px]" />
-          <span v-if="!isCollapsed" class="whitespace-nowrap">{{ f.name }}</span>
+          <span v-if="sidebarShowsText" class="whitespace-nowrap">{{ f.name }}</span>
         </a>
       </div>
     </aside>
 
-    <!-- Main Content -->
-    <main
-      class="pt-24 px-8 pb-12 main-transition min-h-screen"
-      :class="isCollapsed ? 'ml-20' : 'ml-64'"
+    <!-- Mobile overlay backdrop -->
+    <div
+      v-if="mobileOpen"
+      class="fixed inset-0 bg-black/40 z-[55] md:hidden"
+      @click="mobileOpen = false"
+    />
+
+    <!-- Right side: top-bottom layout -->
+    <div
+      class="min-h-screen flex flex-col sidebar-transition"
+      :class="contentPaddingClass"
     >
-      <router-view v-slot="{ Component }">
-        <Transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </Transition>
-      </router-view>
-    </main>
+      <!-- Top Navigation Bar -->
+      <nav class="sticky top-0 w-full h-16 flex items-center justify-between px-6 bg-surface-container-low/70 backdrop-blur-xl z-40 shadow-sm border-b border-outline-variant/30">
+        <div class="flex items-center gap-4 min-w-[200px]">
+          <button
+            class="text-on-surface-variant hover:text-primary transition-colors p-1 cursor-pointer"
+            @click="toggleSidebar"
+          >
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"/>
+              <line x1="3" y1="12" x2="21" y2="12"/>
+              <line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+          <span class="text-xl font-bold text-primary font-headline tracking-tight">Axiom Azure</span>
+        </div>
+
+        <div class="hidden md:flex items-center gap-8 flex-1">
+          <div class="hidden sm:flex items-center bg-surface-container-low px-3 py-1.5 rounded-full gap-2 text-on-surface-variant border border-outline-variant/30">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              class="bg-transparent border-none focus:outline-none text-sm w-32 xl:w-48 font-label"
+              placeholder="搜索..."
+              type="text"
+            />
+          </div>
+
+          <div class="flex items-center gap-8">
+            <router-link
+              v-for="link in navLinks"
+              :key="link.path"
+              :to="link.path"
+              class="font-headline tracking-tight transition-colors duration-200 text-sm"
+              :class="[isActiveRoute(link.path)
+                ? 'text-primary border-b-2 border-primary font-semibold'
+                : 'text-on-surface-variant hover:text-primary']"
+            >
+              {{ link.name }}
+            </router-link>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4 min-w-[200px] justify-end">
+          <!-- Not logged in: Login button -->
+          <button
+            v-if="!userStore.isLoggedIn"
+            class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-headline font-semibold text-on-surface-variant hover:text-primary bg-surface-container-low rounded-lg border border-outline-variant/30 transition-colors cursor-pointer"
+            @click="showLoginDialog = true"
+          >
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+            登录
+          </button>
+
+          <!-- Logged in: User info + Logout -->
+          <div v-else class="flex items-center gap-2.5">
+            <div class="text-right hidden sm:block">
+              <p class="text-xs font-semibold text-on-surface leading-none">{{ userStore.userName }}</p>
+              <p class="text-[9px] text-on-surface-variant font-mono mt-0.5 uppercase tracking-wide">开发模式</p>
+            </div>
+            <div class="relative user-menu-container">
+              <button
+                class="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-outline-variant/30 hover:border-primary transition-colors overflow-hidden shadow-sm cursor-pointer"
+                @click="showUserMenu = !showUserMenu"
+              >
+                <img
+                  :src="`https://api.dicebear.com/7.x/avataaars/svg?seed=${userStore.userName}`"
+                  alt="用户头像"
+                  class="w-full h-full object-cover"
+                />
+              </button>
+              <!-- Dropdown -->
+              <div
+                v-if="showUserMenu"
+                class="absolute right-0 top-full mt-2 w-40 bg-surface-container-lowest rounded-xl border border-outline-variant/30 shadow-lg py-1 z-50"
+              >
+                <button
+                  class="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-on-surface-variant hover:text-danger hover:bg-surface-container transition-colors cursor-pointer"
+                  @click="handleLogout"
+                >
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                  退出登录
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      <!-- Main Content -->
+      <main class="flex-1 px-8 pt-8 pb-12">
+        <router-view v-slot="{ Component }">
+          <Transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </Transition>
+        </router-view>
+      </main>
+    </div>
+
+    <!-- Login Dialog -->
+    <tiny-dialog-box
+      v-model:visible="showLoginDialog"
+      :close-on-click-modal="true"
+      append-to-body
+      title="开发模式登录"
+      width="380px"
+    >
+      <div class="space-y-4 py-2">
+        <div>
+          <label class="text-[10px] font-bold tracking-widest uppercase text-on-surface-variant">用户名</label>
+          <input
+            v-model="loginUsername"
+            class="mt-1 w-full px-3 py-2 text-sm bg-surface-container rounded-lg border border-outline-variant/30 focus:border-primary focus:outline-none transition-colors"
+            placeholder="输入用户名"
+            @keyup.enter="handleLogin"
+          />
+        </div>
+        <p v-if="loginError" class="text-xs text-danger">{{ loginError }}</p>
+      </div>
+      <template #footer>
+        <tiny-button @click="showLoginDialog = false">取消</tiny-button>
+        <tiny-button type="primary" :loading="loginLoading" @click="handleLogin">登录</tiny-button>
+      </template>
+    </tiny-dialog-box>
 
   </div>
 </template>
 
 <script setup>
-import { ref, markRaw } from 'vue'
+import { ref, computed, markRaw, onMounted, onUnmounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { Button as TinyButton } from '@opentiny/vue'
+import { useUserStore } from './stores/user'
+import { Button as TinyButton, DialogBox as TinyDialogBox } from '@opentiny/vue'
 
 const route = useRoute()
+const userStore = useUserStore()
 const isCollapsed = ref(false)
+const mobileOpen = ref(false)
+const hoverExpanded = ref(false)
+
+const showLoginDialog = ref(false)
+const showUserMenu = ref(false)
+const loginUsername = ref('')
+const loginError = ref('')
+const loginLoading = ref(false)
 
 const toggleSidebar = () => {
+  // On mobile, toggle overlay
+  if (window.innerWidth < 768) {
+    mobileOpen.value = !mobileOpen.value
+    return
+  }
   isCollapsed.value = !isCollapsed.value
 }
+
+const onSidebarEnter = () => {
+  if (isCollapsed.value && !mobileOpen.value) {
+    hoverExpanded.value = true
+  }
+}
+
+const onSidebarLeave = () => {
+  hoverExpanded.value = false
+}
+
+// Whether sidebar text should be shown
+const sidebarShowsText = computed(() => {
+  if (!isCollapsed.value) return true
+  if (hoverExpanded.value) return true
+  if (mobileOpen.value) return true
+  return false
+})
+
+// Content area padding-left
+const contentPaddingClass = computed(() => {
+  if (mobileOpen.value) return 'md:pl-64'
+  if (isCollapsed.value) return 'pl-20'
+  return 'pl-64'
+})
 
 const isActiveRoute = (path) => {
   if (path === '/') return route.path === '/'
@@ -155,64 +280,104 @@ const isActiveRoute = (path) => {
 }
 
 const navLinks = [
-  { name: 'Dashboard', path: '/dashboard' },
-  { name: 'Agents', path: '/agents' },
-  { name: 'Workflows', path: '/tools' },
-  { name: 'Analytics', path: '/logs' },
+  { name: '仪表盘', path: '/dashboard' },
+  { name: '提供商', path: '/providers' },
+  { name: '智能体', path: '/agents' },
+  { name: '工作流', path: '/tools' },
+  { name: '分析', path: '/logs' },
 ]
 
 const sidebarItems = [
   {
-    name: 'Fleet Overview',
+    name: '集群概览',
     path: '/dashboard',
     icon: markRaw({
       template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>`
     })
   },
   {
-    name: 'Logic Designer',
+    name: '逻辑设计器',
     path: '/tools',
     icon: markRaw({
       template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><circle cx="5" cy="19" r="3"/><circle cx="19" cy="19" r="3"/><line x1="12" y1="8" x2="5" y2="16"/><line x1="12" y1="8" x2="19" y2="16"/></svg>`
     })
   },
   {
-    name: 'Memory Vault',
+    name: '记忆库',
     path: '/shell',
     icon: markRaw({
       template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>`
     })
   },
   {
-    name: 'API Keys',
-    path: '/agents',
+    name: 'LLM 提供商',
+    path: '/providers',
     icon: markRaw({
-      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>`
+      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>`
     })
   },
   {
-    name: 'System Logs',
+    name: '系统日志',
     path: '/logs',
     icon: markRaw({
       template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`
     })
   },
+  {
+    name: '设置',
+    path: '/settings',
+    icon: markRaw({
+      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>`
+    })
+  },
 ]
 
-const footerItems = [
-  {
-    name: 'Help Center',
-    class: 'hover:text-primary',
-    icon: markRaw({
-      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
-    })
-  },
-  {
-    name: 'Logout',
-    class: 'hover:text-error',
-    icon: markRaw({
-      template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>`
-    })
-  },
-]
+const footerItems = []
+
+async function handleLogin() {
+  if (!loginUsername.value.trim()) {
+    loginError.value = '请输入用户名'
+    return
+  }
+  loginLoading.value = true
+  loginError.value = ''
+  try {
+    await userStore.login(loginUsername.value.trim())
+    showLoginDialog.value = false
+    loginUsername.value = ''
+  } catch (e) {
+    loginError.value = e.response?.data?.detail || '登录失败'
+  } finally {
+    loginLoading.value = false
+  }
+}
+
+function handleLogout() {
+  userStore.logout()
+  showUserMenu.value = false
+}
+
+// Click-outside to close user menu
+function onDocumentClick(e) {
+  if (showUserMenu.value && !e.target.closest('.user-menu-container')) {
+    showUserMenu.value = false
+  }
+}
+onMounted(() => document.addEventListener('click', onDocumentClick))
+onUnmounted(() => document.removeEventListener('click', onDocumentClick))
+
+// Listen for 401 unauthorized from axios interceptor
+function onAuthUnauthorized() {
+  userStore.logout()
+  showUserMenu.value = false
+}
+onMounted(() => window.addEventListener('auth:unauthorized', onAuthUnauthorized))
+onUnmounted(() => window.removeEventListener('auth:unauthorized', onAuthUnauthorized))
 </script>
+
+<style scoped>
+.sidebar-transition {
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              padding-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+</style>

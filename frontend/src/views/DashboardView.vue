@@ -3,10 +3,10 @@
     <!-- Hero Header -->
     <header class="mb-12 max-w-5xl animate-fade-up">
       <h1 class="font-headline text-5xl font-bold tracking-tight text-on-surface mb-4">
-        Active Agent <span class="text-primary">Operations</span>
+        智能体 <span class="text-primary">总览</span>
       </h1>
       <p class="text-on-surface-variant text-lg max-w-2xl leading-relaxed">
-        Curating high-frequency decision loops across your distributed neural architecture. Monitoring {{ agentStore.agents.length }} concurrent streams.
+        监控分布式智能体架构中的高频决策循环，当前追踪 {{ agentStore.agents.length }} 个并发流。
       </p>
     </header>
 
@@ -17,13 +17,13 @@
       <div class="col-span-12 lg:col-span-8 bg-surface-container-lowest rounded-[2rem] p-8 overflow-hidden relative shadow-sm border border-outline-variant/30 animate-fade-up animate-delay-1">
         <div class="flex justify-between items-start mb-12">
           <div>
-            <span class="text-[10px] font-bold tracking-[0.2em] text-primary uppercase block mb-1">Live Workflow</span>
-            <h2 class="text-2xl font-headline font-bold">Neural Distribution Map</h2>
+            <span class="text-[10px] font-bold tracking-[0.2em] text-primary uppercase block mb-1">实时工作流</span>
+            <h2 class="text-2xl font-headline font-bold">神经网络分布图</h2>
           </div>
           <div class="flex gap-2">
             <span class="flex items-center gap-1.5 px-3 py-1 bg-tertiary-fixed text-on-tertiary-fixed rounded-full text-xs font-bold">
               <span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim glow-pulse"></span>
-              STABLE
+              稳定
             </span>
           </div>
         </div>
@@ -39,7 +39,7 @@
                   <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
                 </svg>
               </div>
-              <span class="text-[10px] font-bold text-on-surface-variant">INPUT</span>
+              <span class="text-[10px] font-bold text-on-surface-variant">输入</span>
             </div>
 
             <!-- Flow Line 1 -->
@@ -57,7 +57,7 @@
               </div>
               <div class="text-center">
                 <span class="text-xs font-bold text-primary uppercase tracking-tighter">Azure Core</span>
-                <p class="text-[10px] text-on-surface-variant">Processing...</p>
+                <p class="text-[10px] text-on-surface-variant">处理中...</p>
               </div>
             </div>
 
@@ -73,7 +73,7 @@
                   <path d="m8 17 4 4 4-4"/>
                 </svg>
               </div>
-              <span class="text-[10px] font-bold text-on-surface-variant">OUTPUT</span>
+              <span class="text-[10px] font-bold text-on-surface-variant">输出</span>
             </div>
           </div>
 
@@ -90,7 +90,7 @@
         <!-- Throughput Chart -->
         <div class="bg-surface-container-lowest rounded-[2rem] p-6 shadow-sm border border-outline-variant/30">
           <h3 class="font-headline font-bold text-lg mb-6 flex justify-between items-center">
-            Throughput
+            吞吐量
             <svg class="w-4 h-4 text-on-surface-variant" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>
             </svg>
@@ -112,10 +112,10 @@
         <!-- System Health Card -->
         <div class="bg-primary text-on-primary rounded-[2rem] p-6 shadow-lg relative overflow-hidden">
           <div class="relative z-10">
-            <p class="text-[10px] font-bold tracking-widest uppercase opacity-70 mb-1">System Health</p>
+            <p class="text-[10px] font-bold tracking-widest uppercase opacity-70 mb-1">系统健康</p>
             <h4 class="text-3xl font-headline font-bold">99.98%</h4>
             <div class="mt-4 flex items-center gap-2">
-              <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">Optimized</span>
+              <span class="text-xs bg-white/20 px-2 py-0.5 rounded-full">已优化</span>
             </div>
           </div>
           <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-primary-container rounded-full blur-3xl opacity-50"></div>
@@ -126,15 +126,15 @@
       <div class="col-span-12 animate-fade-up animate-delay-3">
         <div class="flex justify-between items-end mb-6">
           <div>
-            <h2 class="text-3xl font-headline font-bold tracking-tight">Agent Registry</h2>
-            <p class="text-on-surface-variant text-sm">Real-time status of your deployed intelligence nodes.</p>
+            <h2 class="text-3xl font-headline font-bold tracking-tight">智能体注册表</h2>
+            <p class="text-on-surface-variant text-sm">已部署智能体节点的实时状态。</p>
           </div>
           <div class="flex gap-4">
             <tiny-button plain>
-              <span class="text-xs font-bold">Filter: All</span>
+              <span class="text-xs font-bold">筛选: 全部</span>
             </tiny-button>
             <tiny-button plain>
-              <span class="text-xs font-bold">Sort: Performance</span>
+              <span class="text-xs font-bold">排序: 性能</span>
             </tiny-button>
           </div>
         </div>
@@ -214,21 +214,21 @@
               </div>
               <div>
                 <h4 class="font-headline font-bold text-lg leading-tight">Vanguard-Alpha</h4>
-                <p class="text-xs text-on-surface-variant font-medium">Security & Breach Defense</p>
+                <p class="text-xs text-on-surface-variant font-medium">安全与漏洞防御</p>
               </div>
             </div>
             <div class="grid grid-cols-2 gap-4 mb-6">
               <div class="bg-surface-container p-3 rounded-2xl">
-                <p class="text-[10px] text-on-surface-variant font-bold uppercase mb-1">Success</p>
+                <p class="text-[10px] text-on-surface-variant font-bold uppercase mb-1">成功率</p>
                 <p class="text-xl font-headline font-bold text-primary">100%</p>
               </div>
               <div class="bg-surface-container p-3 rounded-2xl">
-                <p class="text-[10px] text-on-surface-variant font-bold uppercase mb-1">Latency</p>
+                <p class="text-[10px] text-on-surface-variant font-bold uppercase mb-1">延迟</p>
                 <p class="text-xl font-headline font-bold text-primary">8ms</p>
               </div>
             </div>
             <button class="w-full py-2.5 rounded-xl border border-primary/20 text-primary text-xs font-bold hover:bg-primary/5 transition-colors cursor-pointer">
-              Full Analytics
+              完整分析
             </button>
           </div>
         </div>
@@ -237,10 +237,10 @@
       <!-- Execution Loops Table -->
       <div class="col-span-12 bg-surface-container-lowest rounded-[2rem] p-8 shadow-sm border border-outline-variant/30 animate-fade-up animate-delay-4">
         <div class="flex justify-between items-center mb-8">
-          <h3 class="font-headline text-2xl font-bold">Recent Execution Loops</h3>
+          <h3 class="font-headline text-2xl font-bold">最近执行循环</h3>
           <tiny-button type="text">
             <span class="text-sm text-primary font-bold flex items-center gap-1">
-              View Full Logs
+              查看完整日志
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="9 18 15 12 9 6"/>
               </svg>
@@ -256,13 +256,13 @@
               </template>
             </tiny-grid-column>
 
-            <tiny-grid-column field="processName" title="Process Name">
+            <tiny-grid-column field="processName" title="流程名称">
               <template #default="{ row }">
                 <span class="text-sm font-bold">{{ row.processName }}</span>
               </template>
             </tiny-grid-column>
 
-            <tiny-grid-column field="initiator" title="Initiator" width="140">
+            <tiny-grid-column field="initiator" title="发起者" width="140">
               <template #default="{ row }">
                 <div class="flex items-center gap-2">
                   <div class="w-6 h-6 rounded-full" :class="row.initiatorBg"></div>
@@ -271,13 +271,13 @@
               </template>
             </tiny-grid-column>
 
-            <tiny-grid-column field="runtime" title="Runtime" width="100">
+            <tiny-grid-column field="runtime" title="运行时间" width="100">
               <template #default="{ row }">
                 <span class="text-xs">{{ row.runtime }}</span>
               </template>
             </tiny-grid-column>
 
-            <tiny-grid-column field="confidence" title="Confidence" width="140">
+            <tiny-grid-column field="confidence" title="置信度" width="140">
               <template #default="{ row }">
                 <div class="flex items-center gap-2">
                   <div class="w-16 h-1 bg-surface-container rounded-full overflow-hidden">
@@ -288,7 +288,7 @@
               </template>
             </tiny-grid-column>
 
-            <tiny-grid-column field="result" title="Result" width="100">
+            <tiny-grid-column field="result" title="结果" width="100">
               <template #default="{ row }">
                 <span class="px-2 py-0.5 bg-tertiary-fixed text-on-tertiary-fixed rounded text-[10px] font-bold uppercase">{{ row.result }}</span>
               </template>
@@ -322,36 +322,36 @@ const agents = [
     id: 1,
     name: 'Lumina-4',
     avatar: 'L4',
-    role: 'Market Sentiment Analyst',
+    role: '市场情绪分析师',
     status: 'Active',
     statusClass: 'text-tertiary-fixed-dim',
     dotClass: 'bg-tertiary-fixed-dim',
-    metricLabel: 'Cognitive Load',
+    metricLabel: '认知负载',
     metricValue: '42%',
     metricPercent: 42,
     barColor: 'bg-primary',
-    primaryAction: 'Configure',
+    primaryAction: '配置',
   },
   {
     id: 2,
     name: 'Nexus-7',
     avatar: 'N7',
-    role: 'Data Pipeline Orchestrator',
+    role: '数据管道编排器',
     status: 'Idle',
     statusClass: 'text-on-surface-variant',
     dotClass: 'bg-slate-300',
-    metricLabel: 'Uptime',
+    metricLabel: '运行时间',
     metricValue: '14d 2h',
     metricPercent: 100,
     barColor: 'bg-slate-300',
-    primaryAction: 'Wake Agent',
+    primaryAction: '唤醒智能体',
   },
 ]
 
 const executions = [
   {
     id: '#AX-2094',
-    processName: 'Market Rebalancing Loop',
+    processName: '市场再平衡循环',
     initiator: 'Lumina-4',
     initiatorBg: 'bg-primary-fixed',
     runtime: '142ms',
@@ -360,7 +360,7 @@ const executions = [
   },
   {
     id: '#AX-2093',
-    processName: 'Cross-Chain Audit',
+    processName: '跨链审计',
     initiator: 'Nexus-7',
     initiatorBg: 'bg-slate-200',
     runtime: '1,204ms',
@@ -369,7 +369,7 @@ const executions = [
   },
   {
     id: '#AX-2092',
-    processName: 'Threat Vector Analysis',
+    processName: '威胁向量分析',
     initiator: 'Vanguard-Alpha',
     initiatorBg: 'bg-primary-fixed',
     runtime: '67ms',
@@ -378,7 +378,7 @@ const executions = [
   },
   {
     id: '#AX-2091',
-    processName: 'Sentiment Aggregation',
+    processName: '情绪聚合',
     initiator: 'Lumina-4',
     initiatorBg: 'bg-primary-fixed',
     runtime: '234ms',

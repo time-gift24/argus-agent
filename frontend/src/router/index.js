@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '../stores/user'
 import DashboardView from '../views/DashboardView.vue'
 import AgentListView from '../views/AgentListView.vue'
 import AgentDetailsView from '../views/AgentDetailsView.vue'
@@ -15,12 +16,23 @@ const routes = [
   { path: '/tools', component: ToolsView },
   { path: '/shell', component: ShellView },
   { path: '/logs', component: LogsView },
+  { path: '/providers', component: () => import('../views/ProvidersView.vue') },
+  { path: '/providers/new', component: () => import('../views/ProviderEditView.vue') },
+  { path: '/providers/:id/edit', component: () => import('../views/ProviderEditView.vue') },
   { path: '/settings', component: SettingsView },
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+// DevMode: no forced redirect, just ensure user store is initialized
+router.beforeEach(async () => {
+  const userStore = useUserStore()
+  if (userStore.isLoggedIn && !userStore.profile) {
+    await userStore.fetchProfile()
+  }
 })
 
 export default router

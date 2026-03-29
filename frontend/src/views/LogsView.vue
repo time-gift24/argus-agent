@@ -2,9 +2,9 @@
   <div class="max-w-7xl mx-auto space-y-5">
     <div class="animate-fade-up">
       <h1 class="text-3xl font-headline font-bold tracking-tight text-on-surface">
-        System <span class="text-primary">Logs</span>
+        系统 <span class="text-primary">日志</span>
       </h1>
-      <p class="text-sm text-on-surface-variant mt-1">Platform runtime logs and event records.</p>
+      <p class="text-sm text-on-surface-variant mt-1">平台运行日志和事件记录。</p>
     </div>
 
     <!-- Logs Panel -->
@@ -12,7 +12,7 @@
       <!-- Toolbar -->
       <div class="p-5 border-b border-outline-variant/20 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">Level:</span>
+          <span class="text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">级别:</span>
           <div class="flex gap-1">
             <button
               v-for="level in levels"
@@ -34,7 +34,7 @@
               <polyline points="7 10 12 15 17 10"/>
               <line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            Export
+            导出
           </span>
         </tiny-button>
       </div>
@@ -55,22 +55,22 @@
 import { ref, computed } from 'vue'
 import { Button as TinyButton } from '@opentiny/vue'
 
-const levels = ['All', 'Info', 'Warning', 'Error']
-const activeLevel = ref('All')
+const levels = ['全部', '信息', '警告', '异常']
+const activeLevel = ref('全部')
 
 // @mock — 8 条硬编码日志；替换为：GET /api/logs
 const logs = [
-  { time: '2026-03-27 14:32:01', level: 'Info', levelClass: 'bg-primary-fixed text-primary', message: 'Agent-003 successfully processed task #2048' },
-  { time: '2026-03-27 14:28:45', level: 'Warning', levelClass: 'bg-warning/10 text-warning', message: 'Agent-007 CPU usage exceeded 85%' },
-  { time: '2026-03-27 14:21:10', level: 'Info', levelClass: 'bg-primary-fixed text-primary', message: 'System auto-backup completed in 23 seconds' },
-  { time: '2026-03-27 14:15:33', level: 'Error', levelClass: 'bg-danger/10 text-danger', message: 'Agent-005 connection timeout, auto-retry initiated' },
-  { time: '2026-03-27 14:10:00', level: 'Info', levelClass: 'bg-primary-fixed text-primary', message: 'New tool plugin "Web Scraper" registered' },
-  { time: '2026-03-27 14:02:18', level: 'Info', levelClass: 'bg-primary-fixed text-primary', message: 'Agent-001 through Agent-005 batch update completed' },
-  { time: '2026-03-27 13:55:42', level: 'Warning', levelClass: 'bg-warning/10 text-warning', message: 'Memory usage at 78%, scaling recommended' },
-  { time: '2026-03-27 13:44:00', level: 'Info', levelClass: 'bg-primary-fixed text-primary', message: 'User "admin" logged in' },
+  { time: '2026-03-27 14:32:01', level: '信息', levelClass: 'bg-primary-fixed text-primary', message: 'Agent-003 成功处理任务 #2048' },
+  { time: '2026-03-27 14:28:45', level: '警告', levelClass: 'bg-warning/10 text-warning', message: 'Agent-007 CPU 使用率超过 85%' },
+  { time: '2026-03-27 14:21:10', level: '信息', levelClass: 'bg-primary-fixed text-primary', message: '系统自动备份完成，耗时 23 秒' },
+  { time: '2026-03-27 14:15:33', level: '异常', levelClass: 'bg-danger/10 text-danger', message: 'Agent-005 连接超时，已自动重试' },
+  { time: '2026-03-27 14:10:00', level: '信息', levelClass: 'bg-primary-fixed text-primary', message: '新工具插件 "网页抓取器" 已注册' },
+  { time: '2026-03-27 14:02:18', level: '信息', levelClass: 'bg-primary-fixed text-primary', message: 'Agent-001 至 Agent-005 批量更新完成' },
+  { time: '2026-03-27 13:55:42', level: '警告', levelClass: 'bg-warning/10 text-warning', message: '内存使用率 78%，建议扩容' },
+  { time: '2026-03-27 13:44:00', level: '信息', levelClass: 'bg-primary-fixed text-primary', message: '用户 "admin" 已登录' },
 ]
 
-const levelMap = { 'All': null, 'Info': 'Info', 'Warning': 'Warning', 'Error': 'Error' }
+const levelMap = { '全部': null, '信息': '信息', '警告': '警告', '异常': '异常' }
 const filteredLogs = computed(() => {
   const l = levelMap[activeLevel.value]
   return l ? logs.filter(log => log.level === l) : logs

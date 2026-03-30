@@ -13,6 +13,14 @@
 ## 谨记技能！！！
 - using-git-worktrees
 
+## 目录级协作入口
+
+- 进入任一业务目录前，先阅读该目录的 `CLAUDE.md`：
+  - `backend/CLAUDE.md`
+  - `frontend/CLAUDE.md`
+  - `api/CLAUDE.md`
+- 根目录 `CLAUDE.md` 负责跨目录规则；各子目录 `CLAUDE.md` 负责本目录的具体实现约束。
+
 # Git 规范
 
 ## 分支只保留一个 commit

@@ -8,6 +8,7 @@ Create Date: 2026-03-29 12:00:00.000000
 import base64
 import json
 import uuid
+from datetime import datetime, timezone
 from typing import Sequence, Union
 
 from alembic import op
@@ -36,12 +37,14 @@ def upgrade() -> None:
         sa.UniqueConstraint("provider_id", "name", name="uq_provider_model_name"),
     )
     op.create_index("ix_provider_model_provider_id", "provider_models", ["provider_id"])
+    _create_default_model_unique_index()
 
     # 2. Data migration: extract model from encrypted config → provider_models
     _migrate_models_from_config()
 
 
 def downgrade() -> None:
+    _drop_default_model_unique_index()
     op.drop_index("ix_provider_model_provider_id", table_name="provider_models")
     op.drop_table("provider_models")
 
@@ -71,6 +74,7 @@ def _migrate_models_from_config() -> None:
         sa.text("SELECT id, config FROM providers WHERE config IS NOT NULL AND config != ''")
     ).fetchall()
 
+    now_utc = datetime.now(timezone.utc)
     for provider_id, config_b64 in providers:
         try:
             config_json = decrypt(config_b64, aes_key)
@@ -80,7 +84,7 @@ def _migrate_models_from_config() -> None:
                 f"Failed to decrypt provider config for provider {provider_id} during model migration"
             ) from exc
 
-        model_name = config.pop("model", None)
+        model_name = str(config.pop("model", "")).strip()
         if not model_name:
             continue
 
@@ -89,9 +93,15 @@ def _migrate_models_from_config() -> None:
         conn.execute(
             sa.text(
                 "INSERT INTO provider_models (id, provider_id, name, is_default, created_at, updated_at) "
-                "VALUES (:id, :provider_id, :name, 1, datetime('now'), datetime('now'))"
+                "VALUES (:id, :provider_id, :name, 1, :created_at, :updated_at)"
             ),
-            {"id": model_id, "provider_id": provider_id, "name": model_name},
+            {
+                "id": model_id,
+                "provider_id": provider_id,
+                "name": model_name,
+                "created_at": now_utc,
+                "updated_at": now_utc,
+            },
         )
 
         # Re-encrypt config without model field
@@ -108,3 +118,32 @@ def _count_encrypted_provider_configs(conn) -> int:
     return conn.execute(
         sa.text("SELECT COUNT(*) FROM providers WHERE config IS NOT NULL AND config != ''")
     ).scalar_one()
+
+
+def _create_default_model_unique_index() -> None:
+    """Ensure each provider has at most one default model."""
+    conn = op.get_bind()
+    dialect = conn.dialect.name
+    if dialect == "sqlite":
+        conn.execute(
+            sa.text(
+                "CREATE UNIQUE INDEX uq_provider_default_model_per_provider "
+                "ON provider_models (provider_id) WHERE is_default = 1"
+            )
+        )
+    elif dialect == "postgresql":
+        conn.execute(
+            sa.text(
+                "CREATE UNIQUE INDEX uq_provider_default_model_per_provider "
+                "ON provider_models (provider_id) WHERE is_default"
+            )
+        )
+    else:
+        raise RuntimeError(
+            f"Unsupported dialect '{dialect}' for partial unique index on provider_models.is_default"
+        )
+
+
+def _drop_default_model_unique_index() -> None:
+    conn = op.get_bind()
+    conn.execute(sa.text("DROP INDEX IF EXISTS uq_provider_default_model_per_provider"))

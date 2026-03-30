@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth.deps import get_current_user_id
@@ -373,7 +374,12 @@ def add_provider_model(
             detail=f"模型 '{data.name}' 已存在",
         )
 
-    is_first = db.query(ProviderModel).filter(ProviderModel.provider_id == provider_id).count() == 0
+    is_first = (
+        db.query(ProviderModel)
+        .filter(ProviderModel.provider_id == provider_id, ProviderModel.is_default == True)
+        .count()
+        == 0
+    )
 
     model = ProviderModel(
         provider_id=provider_id,
@@ -381,9 +387,41 @@ def add_provider_model(
         is_default=is_first,
     )
     db.add(model)
-    db.commit()
-    db.refresh(model)
-    return ProviderModelRead.model_validate(model)
+    try:
+        db.commit()
+        db.refresh(model)
+        return ProviderModelRead.model_validate(model)
+    except IntegrityError:
+        db.rollback()
+        duplicate = (
+            db.query(ProviderModel)
+            .filter(ProviderModel.provider_id == provider_id, ProviderModel.name == data.name)
+            .first()
+        )
+        if duplicate:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"模型 '{data.name}' 已存在",
+            ) from None
+
+        # Concurrent "first model" requests can contend on the default-model unique index.
+        # In that case, persist this model as non-default instead of failing the request.
+        model = ProviderModel(
+            provider_id=provider_id,
+            name=data.name,
+            is_default=False,
+        )
+        db.add(model)
+        try:
+            db.commit()
+            db.refresh(model)
+            return ProviderModelRead.model_validate(model)
+        except IntegrityError as exc:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"模型 '{data.name}' 已存在",
+            ) from exc
 
 
 @router.delete(

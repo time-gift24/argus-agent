@@ -12,6 +12,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -103,6 +104,13 @@ class ProviderModel(Base):
     __table_args__ = (
         UniqueConstraint("provider_id", "name", name="uq_provider_model_name"),
         Index("ix_provider_model_provider_id", "provider_id"),
+        Index(
+            "uq_provider_default_model_per_provider",
+            "provider_id",
+            unique=True,
+            sqlite_where=text("is_default = 1"),
+            postgresql_where=text("is_default"),
+        ),
     )
 
     provider: Mapped["Provider"] = relationship(back_populates="models")

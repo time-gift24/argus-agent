@@ -14,8 +14,8 @@ from app.models.user import Provider
 from app.schemas.user import ProviderTestResult
 
 
-def _build_kwargs(config: dict) -> dict:
-    """Build ChatOpenAI kwargs from a config dict."""
+def _build_kwargs(config: dict, model: str | None = None) -> dict:
+    """Build ChatOpenAI kwargs from a config dict and optional model name."""
     kwargs: dict = {
         "api_key": config["api_key"],
         "request_timeout": 10,
@@ -23,8 +23,8 @@ def _build_kwargs(config: dict) -> dict:
     }
     if config.get("base_url"):
         kwargs["base_url"] = config["base_url"]
-    if config.get("model"):
-        kwargs["model"] = config["model"]
+    if model:
+        kwargs["model"] = model
     return kwargs
 
 
@@ -40,8 +40,8 @@ def _probe(kwargs: dict) -> ProviderTestResult:
         return ProviderTestResult(success=False, message=str(e)[:200])
 
 
-def test_provider_connectivity(provider: Provider) -> ProviderTestResult:
-    """Test if a persisted provider's LLM config is reachable."""
+def test_provider_connectivity(provider: Provider, model_name: str | None = None) -> ProviderTestResult:
+    """Test if a persisted provider's LLM config is reachable with an optional model."""
     if not provider.config:
         return ProviderTestResult(success=False, message="内部提供商不支持测试")
 
@@ -54,11 +54,13 @@ def test_provider_connectivity(provider: Provider) -> ProviderTestResult:
     if not config.get("api_key"):
         return ProviderTestResult(success=False, message="API Key 未配置")
 
-    return _probe(_build_kwargs(config))
+    return _probe(_build_kwargs(config, model_name))
 
 
 def test_config_connectivity(config: dict) -> ProviderTestResult:
     """Test connectivity with raw config (no Provider ORM object needed)."""
     if not config.get("api_key"):
         return ProviderTestResult(success=False, message="API Key 未配置")
-    return _probe(_build_kwargs(config))
+    model = config.get("model")
+    kwargs_config = {k: v for k, v in config.items() if k != "model"}
+    return _probe(_build_kwargs(kwargs_config, model))

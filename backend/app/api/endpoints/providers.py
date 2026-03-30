@@ -1,24 +1,28 @@
-"""Provider endpoints: user providers and internal providers."""
+"""Provider endpoints: user providers, internal providers, and provider models."""
 
 from __future__ import annotations
 
 import json
 from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.auth.deps import get_current_user_id
 from app.core.config import settings
 from app.core.crypto import decrypt, encrypt
 from app.db.session import get_db
-from app.models.user import Provider, ProviderKind, UserProvider
+from app.models.user import Provider, ProviderKind, ProviderModel, UserProvider
 from app.schemas.user import (
     DefaultUpdate,
     ProviderConfigInput,
     ProviderCreate,
     ProviderDetailRead,
+    ProviderModelCreate,
+    ProviderModelRead,
     ProviderRead,
     ProviderTestResult,
     ProviderUpdate,
+    TestConfigInput,
     UserProviderRead,
 )
 from app.services.provider_test import test_config_connectivity, test_provider_connectivity
@@ -35,6 +39,24 @@ def _get_user_provider_association(db: Session, user_id: str, provider_id: str) 
     if not assoc:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Provider not found")
     return assoc
+
+
+def _get_user_provider(db: Session, user_id: str, provider_id: str) -> Provider:
+    """Get a provider owned by the user (via association)."""
+    _get_user_provider_association(db, user_id, provider_id)
+    return db.get(Provider, provider_id)
+
+
+def _create_provider_models(db: Session, provider_id: str, model_names: list[str]) -> None:
+    """Create provider model rows, marking the first model as default."""
+    for index, model_name in enumerate(model_names):
+        db.add(
+            ProviderModel(
+                provider_id=provider_id,
+                name=model_name,
+                is_default=(index == 0),
+            )
+        )
 
 
 def _build_provider_detail(provider: Provider) -> ProviderDetailRead:
@@ -66,11 +88,11 @@ def _build_provider_detail(provider: Provider) -> ProviderDetailRead:
     name="test_provider_config",
 )
 def test_provider_config(
-    config: ProviderConfigInput,
+    body: TestConfigInput,
     _: str = Depends(get_current_user_id),
 ) -> ProviderTestResult:
-    """Test connectivity with raw config (for create/edit forms)."""
-    return test_config_connectivity(config.model_dump())
+    """Test connectivity with raw config (for create/edit forms). Model is a top-level field."""
+    return test_config_connectivity(body.model_dump())
 
 
 # ── Internal providers ────────────────────────────────────────────────────────
@@ -109,12 +131,15 @@ def list_user_providers(
     result = []
     for assoc in associations:
         p = assoc.provider
+        default_model = next((model for model in p.models if model.is_default), None)
         result.append(UserProviderRead(
             id=p.id,
             name=p.name,
             kind=p.kind.value,
             is_default=assoc.is_default,
             created_at=assoc.created_at,
+            default_model_name=default_model.name if default_model else None,
+            model_count=len(p.models),
         ))
     return result
 
@@ -131,20 +156,17 @@ def create_user_provider(
     db: Session = Depends(get_db),
 ) -> ProviderRead:
     """Create a user provider (config is encrypted before storage)."""
-    # Encrypt config
     config_json = json.dumps(data.config.model_dump(), separators=(",", ":"))
     encrypted_config = encrypt(config_json, settings.aes_key_bytes)
 
-    # Create provider
     provider = Provider(
         name=data.name,
         kind=ProviderKind.USER,
         config=encrypted_config,
     )
     db.add(provider)
-    db.flush()  # get provider.id
+    db.flush()
 
-    # Check if this is the user's first provider → set as default
     existing_count = db.query(UserProvider).filter(UserProvider.user_id == user_id).count()
     user_provider = UserProvider(
         user_id=user_id,
@@ -152,6 +174,10 @@ def create_user_provider(
         is_default=(existing_count == 0),
     )
     db.add(user_provider)
+
+    if data.models:
+        _create_provider_models(db, provider.id, data.models)
+
     db.commit()
     db.refresh(provider)
 
@@ -205,7 +231,6 @@ def delete_user_provider(
         .first()
     )
     if not assoc:
-        # Check if it exists but belongs to another user
         provider = db.get(Provider, provider_id)
         if not provider:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Provider not found")
@@ -213,7 +238,6 @@ def delete_user_provider(
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Cannot delete internal provider")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Provider not associated with user")
 
-    # If deleting the default provider, reassign default to most recent remaining
     if assoc.is_default:
         remaining = (
             db.query(UserProvider)
@@ -247,10 +271,8 @@ def set_default_provider(
     if not target:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Provider not associated with user")
 
-    # Clear all defaults for this user
     db.query(UserProvider).filter(UserProvider.user_id == user_id).update({"is_default": False})
 
-    # Set new default
     target.is_default = True
     db.add(target)
     db.commit()
@@ -263,6 +285,8 @@ def set_default_provider(
         kind=p.kind.value,
         is_default=target.is_default,
         created_at=target.created_at,
+        default_model_name=next((model.name for model in p.models if model.is_default), None),
+        model_count=len(p.models),
     )
 
 
@@ -276,7 +300,7 @@ def test_user_provider(
     user_id: str = Depends(get_current_user_id),
     db: Session = Depends(get_db),
 ) -> ProviderTestResult:
-    """Test connectivity of a user provider."""
+    """Test connectivity of a user provider's default model."""
     assoc = (
         db.query(UserProvider)
         .filter(UserProvider.user_id == user_id, UserProvider.provider_id == provider_id)
@@ -289,4 +313,198 @@ def test_user_provider(
     if provider.kind == ProviderKind.INTERNAL:
         return ProviderTestResult(success=False, message="内部提供商不支持测试")
 
-    return test_provider_connectivity(provider)
+    default_model = (
+        db.query(ProviderModel)
+        .filter(ProviderModel.provider_id == provider_id, ProviderModel.is_default == True)
+        .first()
+    )
+    if not default_model:
+        return ProviderTestResult(success=False, message="该 Provider 尚未配置模型")
+
+    return test_provider_connectivity(provider, default_model.name)
+
+
+# ── Provider Models ──────────────────────────────────────────────────────────
+
+
+@router.get(
+    "/providers/{provider_id}/models",
+    response_model=list[ProviderModelRead],
+    name="list_provider_models",
+)
+def list_provider_models(
+    provider_id: str,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> list[ProviderModelRead]:
+    """List all models for a provider."""
+    _get_user_provider_association(db, user_id, provider_id)
+    models = (
+        db.query(ProviderModel)
+        .filter(ProviderModel.provider_id == provider_id)
+        .order_by(ProviderModel.created_at)
+        .all()
+    )
+    return [ProviderModelRead.model_validate(m) for m in models]
+
+
+@router.post(
+    "/providers/{provider_id}/models",
+    response_model=ProviderModelRead,
+    status_code=status.HTTP_201_CREATED,
+    name="add_provider_model",
+)
+def add_provider_model(
+    provider_id: str,
+    data: ProviderModelCreate,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> ProviderModelRead:
+    """Add a model to a provider. First model auto-set as default."""
+    _get_user_provider_association(db, user_id, provider_id)
+
+    existing = (
+        db.query(ProviderModel)
+        .filter(ProviderModel.provider_id == provider_id, ProviderModel.name == data.name)
+        .first()
+    )
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"模型 '{data.name}' 已存在",
+        )
+
+    is_first = (
+        db.query(ProviderModel)
+        .filter(ProviderModel.provider_id == provider_id, ProviderModel.is_default == True)
+        .count()
+        == 0
+    )
+
+    model = ProviderModel(
+        provider_id=provider_id,
+        name=data.name,
+        is_default=is_first,
+    )
+    db.add(model)
+    try:
+        db.commit()
+        db.refresh(model)
+        return ProviderModelRead.model_validate(model)
+    except IntegrityError:
+        db.rollback()
+        duplicate = (
+            db.query(ProviderModel)
+            .filter(ProviderModel.provider_id == provider_id, ProviderModel.name == data.name)
+            .first()
+        )
+        if duplicate:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"模型 '{data.name}' 已存在",
+            ) from None
+
+        # Concurrent "first model" requests can contend on the default-model unique index.
+        # In that case, persist this model as non-default instead of failing the request.
+        model = ProviderModel(
+            provider_id=provider_id,
+            name=data.name,
+            is_default=False,
+        )
+        db.add(model)
+        try:
+            db.commit()
+            db.refresh(model)
+            return ProviderModelRead.model_validate(model)
+        except IntegrityError as exc:
+            db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=f"模型 '{data.name}' 已存在",
+            ) from exc
+
+
+@router.delete(
+    "/providers/{provider_id}/models/{model_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    name="delete_provider_model",
+)
+def delete_provider_model(
+    provider_id: str,
+    model_id: str,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> None:
+    """Delete a model from a provider. Reassigns default if needed."""
+    _get_user_provider_association(db, user_id, provider_id)
+
+    model = db.get(ProviderModel, model_id)
+    if not model or model.provider_id != provider_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="模型不存在")
+
+    was_default = model.is_default
+    db.delete(model)
+    db.flush()
+
+    if was_default:
+        new_default = (
+            db.query(ProviderModel)
+            .filter(ProviderModel.provider_id == provider_id)
+            .order_by(ProviderModel.created_at.desc())
+            .first()
+        )
+        if new_default:
+            new_default.is_default = True
+
+    db.commit()
+
+
+@router.put(
+    "/providers/{provider_id}/models/{model_id}/default",
+    response_model=ProviderModelRead,
+    name="set_default_provider_model",
+)
+def set_default_provider_model(
+    provider_id: str,
+    model_id: str,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> ProviderModelRead:
+    """Set a model as the default for its provider."""
+    _get_user_provider_association(db, user_id, provider_id)
+
+    model = db.get(ProviderModel, model_id)
+    if not model or model.provider_id != provider_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="模型不存在")
+
+    db.query(ProviderModel).filter(ProviderModel.provider_id == provider_id).update({"is_default": False})
+    model.is_default = True
+    db.add(model)
+    db.commit()
+    db.refresh(model)
+    return ProviderModelRead.model_validate(model)
+
+
+@router.post(
+    "/providers/{provider_id}/models/{model_id}/test",
+    response_model=ProviderTestResult,
+    name="test_provider_model",
+)
+def test_provider_model(
+    provider_id: str,
+    model_id: str,
+    user_id: str = Depends(get_current_user_id),
+    db: Session = Depends(get_db),
+) -> ProviderTestResult:
+    """Test connectivity of a specific model under a provider."""
+    _get_user_provider_association(db, user_id, provider_id)
+
+    model = db.get(ProviderModel, model_id)
+    if not model or model.provider_id != provider_id:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="模型不存在")
+
+    provider = db.get(Provider, provider_id)
+    if not provider or provider.kind == ProviderKind.INTERNAL:
+        return ProviderTestResult(success=False, message="内部提供商不支持测试")
+
+    return test_provider_connectivity(provider, model.name)

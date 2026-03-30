@@ -55,7 +55,7 @@ def db_engine():
     from app.db.base_class import Base
     from app.models.mcp_config import McpServerConfig  # noqa: F401 — registers models
     from app.models.tool import Tool  # noqa: F401 — registers models
-    from app.models.user import Provider, User, UserProvider  # noqa: F401 — registers models
+    from app.models.user import Provider, ProviderModel, User, UserProvider  # noqa: F401 — registers models
 
     Base.metadata.create_all(bind=engine)
     yield engine
@@ -102,6 +102,7 @@ def _build_client(db_engine, db_session_factory, *, raise_server_exceptions: boo
     # Clean state: delete in dependency order, using session to stay consistent
     with db_engine.begin() as conn:
         conn.execute(text("DELETE FROM tools"))
+        conn.execute(text("DELETE FROM provider_models"))
         conn.execute(text("DELETE FROM user_providers"))
         conn.execute(text("DELETE FROM providers"))
         conn.execute(text("DELETE FROM users"))
